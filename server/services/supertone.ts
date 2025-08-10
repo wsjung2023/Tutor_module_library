@@ -1,12 +1,12 @@
 import type { TTSRequest } from "@shared/schema";
 
 // Supertone voice mapping for English learning
-// Using actual Supertone voice IDs that are available in their system
+// Using actual Supertone voice IDs from the API
 const VOICE_MAP = {
-  'female_friendly': 'voice_001',       // Default female voice
-  'male_calm': 'voice_002',             // Default male voice  
-  'business_formal': 'voice_003',       // Professional voice
-  'female_cheerful': 'voice_001'        // Use same friendly voice
+  'female_friendly': '91992bbd4758bdcf9c9b01',    // Adam (male but works as fallback)
+  'male_calm': '91992bbd4758bdcf9c9b01',          // Adam - young adult male voice
+  'business_formal': '91992bbd4758bdcf9c9b01',    // Adam for all - we'll get more voices later
+  'female_cheerful': '91992bbd4758bdcf9c9b01'     // Adam for all - need to get female voices
 };
 
 export async function generateTTS(request: TTSRequest): Promise<{ audioUrl: string }> {
