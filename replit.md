@@ -38,7 +38,7 @@ Preferred communication style: Simple, everyday language.
 
 - **OpenAI GPT-4o**: Conversational dialogue generation using the latest model
 - **OpenAI DALL-E 3**: Character image generation with customized prompts
-- **ElevenLabs**: High-quality text-to-speech with voice mapping for different character styles
+- **Supertone**: High-quality text-to-speech with voice mapping for different character styles
 - **Neon Database**: Serverless PostgreSQL database provider
 - **Font Awesome**: Icon library for UI elements
 - **Google Fonts**: Inter and Poppins font families for typography

@@ -8,7 +8,7 @@ import {
 } from "@shared/schema";
 import { generateCharacterImage } from "./services/openai";
 import { generateDialogue } from "./services/openai";
-import { generateTTS } from "./services/elevenlabs";
+import { generateTTS } from "./services/supertone";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Character Image Generation

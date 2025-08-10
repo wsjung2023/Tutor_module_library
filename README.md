@@ -9,7 +9,7 @@
 - **AI 캐릭터 생성**: DALL-E로 맞춤형 튜터 이미지 생성
 - **시나리오 기반 학습**: 대상별 맞춤 프리셋 또는 자유 입력
 - **AI 대화 생성**: GPT-4o로 3줄 대화와 핵심 표현 추천
-- **TTS 음성 합성**: ElevenLabs로 자연스러운 음성 재생
+- **TTS 음성 합성**: Supertone으로 자연스러운 음성 재생
 - **실시간 자막**: 재생 중인 문장 하이라이트
 
 ### User Experience
@@ -36,14 +36,14 @@
 ### AI Services
 - **OpenAI GPT-4o** - 대화 생성 (최신 모델)
 - **OpenAI DALL-E 3** - 캐릭터 이미지 생성
-- **ElevenLabs** - 고품질 TTS 음성 합성
+- **Supertone** - 고품질 TTS 음성 합성
 
 ## 📋 Prerequisites
 
 - **Node.js** 18+ 
 - **npm** 또는 **yarn**
 - **OpenAI API Key** (GPT-4o, DALL-E 3)
-- **ElevenLabs API Key** (TTS)
+- **Supertone API Key** (TTS)
 
 ## 🚀 Quick Start
 
