@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { SCENARIO_PRESETS } from '@/constants/presets';
 import { Button } from '@/components/ui/button';
@@ -23,10 +23,12 @@ export default function Scenario() {
     setScenario({ presetKey, freeText: '' });
   };
 
-  const handleCustomTextChange = (text: string) => {
+  // 한글 입력 처리를 위한 핸들러
+  const handleCustomTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
     setScenario({ freeText: text, presetKey: undefined });
     setSelectedPreset(null);
-  };
+  }, [setScenario]);
 
   const handleNext = () => {
     if (!scenario.presetKey && !scenario.freeText?.trim()) {
@@ -96,7 +98,7 @@ export default function Scenario() {
                 <Textarea
                   id="custom-scenario"
                   value={scenario.freeText || ''}
-                  onChange={(e) => handleCustomTextChange(e.target.value)}
+                  onChange={handleCustomTextChange}
                   rows={6}
                   placeholder="Describe a specific situation you'd like to practice... For example: 'I want to practice asking for directions at the airport' or 'Help me with small talk at a coffee shop'"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"

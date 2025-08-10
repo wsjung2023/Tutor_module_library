@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,12 @@ export default function Character() {
   } = useAppStore();
   const { toast } = useToast();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+
+  // 한글 입력 처리를 위한 핸들러
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCharacter({ name: value });
+  }, [setCharacter]);
 
   const handleGenerateCharacter = async () => {
     if (!character.name || !character.gender || !character.style || !audience) {
@@ -139,7 +145,7 @@ export default function Character() {
                 <Input
                   id="name"
                   value={character.name}
-                  onChange={(e) => setCharacter({ name: e.target.value })}
+                  onChange={handleNameChange}
                   placeholder="Enter tutor name..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
