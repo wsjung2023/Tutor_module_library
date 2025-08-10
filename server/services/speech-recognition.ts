@@ -61,6 +61,8 @@ export async function generateConversationResponse(
   }
 
   try {
+    console.log('Generating conversation response for:', { userInput, character, topic });
+    
     // Build conversation context
     const historyText = conversationHistory
       .slice(-6) // Keep only last 6 exchanges for context
@@ -89,6 +91,8 @@ Respond in JSON format:
   }
 }`;
 
+    console.log('Sending prompt to OpenAI...');
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
@@ -105,6 +109,8 @@ Respond in JSON format:
       temperature: 0.7,
     });
 
+    console.log('OpenAI response received:', completion.choices[0].message.content);
+    
     const result = JSON.parse(completion.choices[0].message.content || '{}');
     
     return {

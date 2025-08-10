@@ -176,6 +176,8 @@ export default function InteractivePlayground() {
         const base64Audio = reader.result as string;
         const audioData = base64Audio.split(',')[1]; // Remove data:audio/webm;base64, prefix
         
+        let userText = '';
+        
         try {
           // Speech recognition
           const speechResult: any = await apiRequest('POST', '/api/speech-recognition', {
@@ -183,7 +185,7 @@ export default function InteractivePlayground() {
             language: 'en'
           });
           
-          const userText = speechResult.text;
+          userText = speechResult.text;
           
           if (!userText.trim()) {
             toast({
@@ -205,6 +207,13 @@ export default function InteractivePlayground() {
           setConversationHistory(prev => [...prev, userTurn]);
           
           // Generate character response
+          console.log('Sending conversation request:', {
+            userInput: userText,
+            character: character.name,
+            style: character.style,
+            topic: currentTopic
+          });
+          
           const responseResult: any = await apiRequest('POST', '/api/conversation-response', {
             userInput: userText,
             conversationHistory: conversationHistory.map(turn => ({
@@ -217,6 +226,8 @@ export default function InteractivePlayground() {
             },
             topic: currentTopic
           });
+          
+          console.log('Character response received:', responseResult);
           
           // Generate TTS for character response
           const ttsResponse: any = await apiRequest('POST', '/api/tts', {
@@ -258,9 +269,28 @@ export default function InteractivePlayground() {
           
         } catch (error) {
           console.error('Failed to process speech:', error);
+          
+          // Add user message anyway if we have text
+          if (userText && userText.trim()) {
+            const userTurn: ConversationTurn = {
+              speaker: 'user',
+              text: userText,
+              timestamp: Date.now()
+            };
+            setConversationHistory(prev => [...prev, userTurn]);
+            
+            // Add a simple fallback response
+            const fallbackTurn: ConversationTurn = {
+              speaker: 'character',
+              text: `I heard you say "${userText}". That's interesting! Could you tell me more about that?`,
+              timestamp: Date.now()
+            };
+            setConversationHistory(prev => [...prev, fallbackTurn]);
+          }
+          
           toast({
             title: "Processing Error",
-            description: "Failed to process your speech. Please try again.",
+            description: `Failed to generate response: ${error instanceof Error ? error.message : 'Unknown error'}`,
             variant: "destructive",
           });
         }
