@@ -8,7 +8,7 @@ import {
 } from "@shared/schema";
 import { generateCharacterImage } from "./services/openai";
 import { generateDialogue } from "./services/openai";
-import { getSupertoneVoices } from "./services/supertone-test";
+
 import { generateTTS } from "./services/supertone";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -37,20 +37,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Dialogue generation error:", error);
       res.status(500).json({ 
         message: "Failed to generate dialogue",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
-  // Debug endpoint to check available voices
-  app.get("/api/debug/voices", async (req, res) => {
-    try {
-      const voices = await getSupertoneVoices();
-      res.json({ voices });
-    } catch (error) {
-      console.error("Failed to fetch voices:", error);
-      res.status(500).json({ 
-        message: "Failed to fetch voices", 
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
