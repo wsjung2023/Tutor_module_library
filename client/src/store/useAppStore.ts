@@ -107,7 +107,7 @@ export const useAppStore = create<AppState>()(
       resetState: () => set(initialState),
     }),
     {
-      name: 'ai-english-tutor-storage',
+      name: 'ai-english-tutor-storage-v2',
       partialize: (state) => ({
         audience: state.audience,
         character: state.character,
@@ -115,6 +115,7 @@ export const useAppStore = create<AppState>()(
         dialogue: state.dialogue,
         audioUrls: state.audioUrls,
         focusPhrases: state.focusPhrases,
+        currentPage: state.currentPage, // 현재 페이지도 저장
       }),
     }
   )

@@ -20,10 +20,21 @@ export default function Character() {
   } = useAppStore();
   const { toast } = useToast();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
 
-  // 한글 입력 처리를 위한 핸들러
+  // 한글 조합 상태 추적
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  const handleCompositionEnd = useCallback(() => {
+    setIsComposing(false);
+  }, []);
+
+  // 한글 입력 처리를 위한 핸들러 - 더 안정적인 접근법
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    // 즉시 상태 업데이트 (조합 상태와 관계없이)
     setCharacter({ name: value });
   }, [setCharacter]);
 
@@ -146,6 +157,8 @@ export default function Character() {
                   id="name"
                   value={character.name}
                   onChange={handleNameChange}
+                  onCompositionStart={handleCompositionStart}
+                  onCompositionEnd={handleCompositionEnd}
                   placeholder="Enter tutor name..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />

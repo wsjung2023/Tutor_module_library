@@ -18,6 +18,8 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { currentPage } = useAppStore();
 
+
+
   // Render current page based on state
   const renderCurrentPage = () => {
     switch (currentPage) {

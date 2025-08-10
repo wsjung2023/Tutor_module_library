@@ -15,6 +15,7 @@ export default function Scenario() {
   } = useAppStore();
   const { toast } = useToast();
   const [selectedPreset, setSelectedPreset] = useState<string | null>(scenario.presetKey || null);
+  const [isComposing, setIsComposing] = useState(false);
 
   const presets = audience ? SCENARIO_PRESETS[audience] : [];
 
@@ -23,9 +24,19 @@ export default function Scenario() {
     setScenario({ presetKey, freeText: '' });
   };
 
-  // 한글 입력 처리를 위한 핸들러
+  // 한글 조합 상태 추적
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  const handleCompositionEnd = useCallback(() => {
+    setIsComposing(false);
+  }, []);
+
+  // 한글 입력 처리를 위한 핸들러 - 더 안정적인 접근법
   const handleCustomTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
+    // 즉시 상태 업데이트
     setScenario({ freeText: text, presetKey: undefined });
     setSelectedPreset(null);
   }, [setScenario]);
@@ -99,6 +110,8 @@ export default function Scenario() {
                   id="custom-scenario"
                   value={scenario.freeText || ''}
                   onChange={handleCustomTextChange}
+                  onCompositionStart={handleCompositionStart}
+                  onCompositionEnd={handleCompositionEnd}
                   rows={6}
                   placeholder="Describe a specific situation you'd like to practice... For example: 'I want to practice asking for directions at the airport' or 'Help me with small talk at a coffee shop'"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
