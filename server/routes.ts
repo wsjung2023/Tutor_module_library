@@ -4,11 +4,12 @@ import { storage } from "./storage";
 import { 
   generateImageRequestSchema, 
   generateDialogueRequestSchema, 
-  ttsRequestSchema 
+  ttsRequestSchema,
+  speechRecognitionRequestSchema
 } from "@shared/schema";
 import { generateCharacterImage } from "./services/openai";
 import { generateDialogue } from "./services/openai";
-
+import { recognizeSpeech, generateConversationResponse } from "./services/speech-recognition";
 import { generateTTS } from "./services/supertone";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -37,6 +38,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Dialogue generation error:", error);
       res.status(500).json({ 
         message: "Failed to generate dialogue",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Speech Recognition endpoint
+  app.post("/api/speech-recognition", async (req, res) => {
+    try {
+      const validatedData = speechRecognitionRequestSchema.parse(req.body);
+      const result = await recognizeSpeech(validatedData);
+      res.json(result);
+    } catch (error) {
+      console.error("Speech recognition error:", error);
+      res.status(500).json({ 
+        message: "Failed to recognize speech",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Conversation response generation
+  app.post("/api/conversation-response", async (req, res) => {
+    try {
+      const { userInput, conversationHistory, character, topic } = req.body;
+      const result = await generateConversationResponse(userInput, conversationHistory, character, topic);
+      res.json(result);
+    } catch (error) {
+      console.error("Conversation response error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate conversation response",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

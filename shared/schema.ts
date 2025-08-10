@@ -72,6 +72,31 @@ export const ttsRequestSchema = z.object({
   voiceId: z.string().min(1),
 });
 
+export const speechRecognitionRequestSchema = z.object({
+  audioBlob: z.string(), // base64 encoded audio
+  language: z.enum(['en', 'ko']).default('en'),
+});
+
+export const conversationTurnSchema = z.object({
+  speaker: z.enum(['user', 'character']),
+  text: z.string(),
+  audioUrl: z.string().optional(),
+  timestamp: z.number(),
+  feedback: z.object({
+    accuracy: z.number().min(0).max(100).optional(),
+    suggestions: z.array(z.string()).optional(),
+    pronunciation: z.string().optional(),
+  }).optional(),
+});
+
+export const conversationStateSchema = z.object({
+  turns: z.array(conversationTurnSchema),
+  currentTopic: z.string(),
+  level: z.enum(['beginner', 'intermediate', 'advanced']),
+  isListening: z.boolean(),
+  isWaitingForResponse: z.boolean(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertSession = z.infer<typeof insertSessionSchema>;
@@ -81,3 +106,6 @@ export type Scenario = z.infer<typeof scenarioSchema>;
 export type GenerateImageRequest = z.infer<typeof generateImageRequestSchema>;
 export type GenerateDialogueRequest = z.infer<typeof generateDialogueRequestSchema>;
 export type TTSRequest = z.infer<typeof ttsRequestSchema>;
+export type SpeechRecognitionRequest = z.infer<typeof speechRecognitionRequestSchema>;
+export type ConversationTurn = z.infer<typeof conversationTurnSchema>;
+export type ConversationState = z.infer<typeof conversationStateSchema>;
