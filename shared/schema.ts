@@ -1,0 +1,83 @@
+import { sql } from "drizzle-orm";
+import { pgTable, text, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const sessions = pgTable("sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  audience: text("audience").notNull(), // 'student', 'general', 'business'
+  character: jsonb("character").$type<{
+    name: string;
+    gender: 'male' | 'female';
+    style: 'cheerful' | 'calm' | 'strict';
+    imageUrl?: string;
+  }>().notNull(),
+  scenario: jsonb("scenario").$type<{
+    presetKey?: string;
+    freeText?: string;
+  }>().notNull(),
+  dialogue: text("dialogue").array().default([]),
+  audioUrls: text("audio_urls").array().default([]),
+  focusPhrases: text("focus_phrases").array().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const characterSchema = z.object({
+  name: z.string().min(1, "Character name is required"),
+  gender: z.enum(['male', 'female']),
+  style: z.enum(['cheerful', 'calm', 'strict']),
+  imageUrl: z.string().optional(),
+});
+
+export const scenarioSchema = z.object({
+  presetKey: z.string().optional(),
+  freeText: z.string().optional(),
+}).refine(data => data.presetKey || data.freeText, {
+  message: "Either preset or custom scenario is required"
+});
+
+export const generateImageRequestSchema = z.object({
+  name: z.string(),
+  gender: z.enum(['male', 'female']),
+  style: z.enum(['cheerful', 'calm', 'strict']),
+  audience: z.enum(['student', 'general', 'business']),
+});
+
+export const generateDialogueRequestSchema = z.object({
+  audience: z.enum(['student', 'general', 'business']),
+  character: characterSchema,
+  scenario: scenarioSchema,
+});
+
+export const ttsRequestSchema = z.object({
+  text: z.string().min(1),
+  voiceId: z.string().min(1),
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type Session = typeof sessions.$inferSelect;
+export type Character = z.infer<typeof characterSchema>;
+export type Scenario = z.infer<typeof scenarioSchema>;
+export type GenerateImageRequest = z.infer<typeof generateImageRequestSchema>;
+export type GenerateDialogueRequest = z.infer<typeof generateDialogueRequestSchema>;
+export type TTSRequest = z.infer<typeof ttsRequestSchema>;
