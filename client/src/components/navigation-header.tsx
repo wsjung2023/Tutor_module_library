@@ -2,7 +2,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 
 export default function NavigationHeader() {
-  const { currentPage, setCurrentPage, resetState } = useAppStore();
+  const { currentPage, setCurrentPage, resetState, audience, character } = useAppStore();
 
   const handleLogoClick = () => {
     resetState();
@@ -36,7 +36,7 @@ export default function NavigationHeader() {
             
             <button 
               onClick={() => setCurrentPage('character')}
-              disabled={!useAppStore.getState().audience}
+              disabled={!audience}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive('character') 
                   ? 'text-blue-600 bg-blue-50' 
@@ -48,7 +48,7 @@ export default function NavigationHeader() {
 
             <Button 
               onClick={() => setCurrentPage('playground')}
-              disabled={!useAppStore.getState().character.name}
+              disabled={!character.name}
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >

@@ -31,10 +31,9 @@ export default function Character() {
     setIsComposing(false);
   }, []);
 
-  // 한글 입력 처리를 위한 핸들러 - 더 안정적인 접근법
+  // 입력 처리 핸들러 - 최적화된 버전
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // 즉시 상태 업데이트 (조합 상태와 관계없이)
     setCharacter({ name: value });
   }, [setCharacter]);
 

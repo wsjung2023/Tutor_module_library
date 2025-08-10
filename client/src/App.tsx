@@ -18,33 +18,19 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { currentPage } = useAppStore();
 
-
-
-  // Render current page based on state
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <Home />;
-      case 'character':
-        return <Character />;
-      case 'scenario':
-        return <Scenario />;
-      case 'playground':
-        return <Playground />;
-      default:
-        return <Home />;
-    }
-  };
-
-  return (
-    <Switch>
-      <Route path="/" component={() => renderCurrentPage()} />
-      <Route path="/character" component={() => renderCurrentPage()} />
-      <Route path="/scenario" component={() => renderCurrentPage()} />
-      <Route path="/playground" component={() => renderCurrentPage()} />
-      <Route component={NotFound} />
-    </Switch>
-  );
+  // Direct component rendering based on currentPage state
+  switch (currentPage) {
+    case 'home':
+      return <Home />;
+    case 'character':
+      return <Character />;
+    case 'scenario':
+      return <Scenario />;
+    case 'playground':
+      return <Playground />;
+    default:
+      return <Home />;
+  }
 }
 
 function App() {
