@@ -1,5 +1,5 @@
-import VoiceChat from './voice-chat';
+import DramaScene from './drama-scene';
 
 export default function Playground() {
-  return <VoiceChat />;
+  return <DramaScene />;
 }
