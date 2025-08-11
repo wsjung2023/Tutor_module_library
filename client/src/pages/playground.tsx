@@ -1,5 +1,5 @@
-import InteractivePlayground from './playground-new';
+import VoiceChat from './voice-chat';
 
 export default function Playground() {
-  return <InteractivePlayground />;
+  return <VoiceChat />;
 }
