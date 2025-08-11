@@ -131,35 +131,14 @@ export default function DramaScene() {
       setDialogueHistory([systemTurn, openingTurn]);
       setSceneProgress(10);
       
-      // Auto-play opening line
-      if (ttsResponse?.audioUrl) {
-        setTimeout(() => {
-          if (audioRef.current) {
-            console.log('Playing opening audio:', ttsResponse.audioUrl.substring(0, 50) + '...');
-            audioRef.current.src = ttsResponse.audioUrl;
-            audioRef.current.play()
-              .then(() => {
-                console.log('Audio playback started');
-                toast({
-                  title: `🎭 ${character.name} is speaking!`,
-                  description: "The scene has begun. Listen and respond when ready."
-                });
-              })
-              .catch(error => {
-                console.error('Audio playback failed:', error);
-                toast({
-                  title: "Audio Issue",
-                  description: "Click the replay button to hear the character.",
-                });
-              });
-          }
-        }, 1500);
-      } else {
+      // Auto-play opening line with fallback
+      setTimeout(() => {
+        playAudioWithFallback(openingLine, ttsResponse?.audioUrl);
         toast({
-          title: "Scene Started",
-          description: `${character.name} is ready! Use the replay button for audio.`,
+          title: `🎭 ${character.name} is speaking!`,
+          description: "The scene has begun. Listen and respond when ready."
         });
-      }
+      }, 1500);
       
     } catch (error) {
       console.error('Failed to start scenario:', error);
@@ -342,21 +321,9 @@ export default function DramaScene() {
           setDialogueHistory(prev => [...prev, characterResponse]);
           setSceneProgress(prev => Math.min(prev + 15, 100));
           
-          // Play character response
+          // Play character response with fallback
           setTimeout(() => {
-            if (audioRef.current && ttsResponse.audioUrl) {
-              console.log('Playing character response audio');
-              audioRef.current.src = ttsResponse.audioUrl;
-              audioRef.current.play()
-                .then(() => console.log('Character response audio played'))
-                .catch(error => {
-                  console.error('Character audio failed:', error);
-                  toast({
-                    title: "Audio Playback Issue",
-                    description: "Use the replay button if needed.",
-                  });
-                });
-            }
+            playAudioWithFallback(contextualResponse.text, ttsResponse?.audioUrl);
           }, 500);
           
           // Show feedback
@@ -439,21 +406,70 @@ Respond in JSON format:
     }
   };
 
-  const playAudio = (turn: DialogueTurn) => {
-    if (turn.audioUrl && audioRef.current) {
-      console.log('Manual play audio triggered');
-      audioRef.current.src = turn.audioUrl;
+  const playAudioWithFallback = (text: string, audioUrl?: string) => {
+    // Try Supertone audio first
+    if (audioUrl && audioRef.current) {
+      console.log('Playing Supertone audio');
+      audioRef.current.src = audioUrl;
       audioRef.current.play()
-        .then(() => console.log('Manual audio playback successful'))
+        .then(() => console.log('Supertone audio played'))
         .catch(error => {
-          console.error('Manual audio playback failed:', error);
-          toast({
-            title: "Audio Playback Failed",
-            description: "Try refreshing the page or check your audio settings.",
-            variant: "destructive"
-          });
+          console.error('Supertone audio failed, using browser TTS:', error);
+          speakWithBrowserTTS(text);
         });
+    } else {
+      // Fallback to browser TTS
+      console.log('Using browser TTS fallback');
+      speakWithBrowserTTS(text);
     }
+  };
+
+  const speakWithBrowserTTS = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      utterance.volume = 0.8;
+      
+      // Try to use a female voice
+      const voices = speechSynthesis.getVoices();
+      const femaleVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('woman') ||
+        voice.name.toLowerCase().includes('samantha') ||
+        voice.name.toLowerCase().includes('karen')
+      );
+      
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+      }
+      
+      utterance.onstart = () => console.log('Browser TTS started');
+      utterance.onend = () => console.log('Browser TTS finished');
+      utterance.onerror = (error) => console.error('Browser TTS error:', error);
+      
+      speechSynthesis.speak(utterance);
+      
+      toast({
+        title: "Using Browser Voice",
+        description: "External voice service unavailable, using system voice.",
+      });
+    } else {
+      console.error('Browser TTS not supported');
+      toast({
+        title: "Voice Not Available",
+        description: "Your browser doesn't support text-to-speech.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const playAudio = (turn: DialogueTurn) => {
+    playAudioWithFallback(turn.text, turn.audioUrl);
   };
 
   const startContinuousListening = async () => {
