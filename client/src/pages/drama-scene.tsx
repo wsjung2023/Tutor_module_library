@@ -109,7 +109,11 @@ export default function DramaScene() {
       // Generate character's opening dialogue with TTS
       const ttsResponse: any = await apiRequest('POST', '/api/tts', {
         text: openingLine,
-        voiceId: 'female_friendly'
+        voiceId: 'female_friendly',
+        character: {
+          style: character.style,
+          gender: character.gender
+        }
       });
       
       console.log('TTS Response received:', ttsResponse ? 'Success' : 'Failed');
@@ -304,10 +308,14 @@ export default function DramaScene() {
           // Generate character's contextual response
           const contextualResponse = await generateContextualResponse(userText);
           
-          // Generate TTS for character response
+          // Generate TTS for character response with character info
           const ttsResponse: any = await apiRequest('POST', '/api/tts', {
             text: contextualResponse.text,
-            voiceId: 'female_friendly'
+            voiceId: 'female_friendly',
+            character: {
+              style: character.style,
+              gender: character.gender
+            }
           });
           
           const characterResponse: DialogueTurn = {

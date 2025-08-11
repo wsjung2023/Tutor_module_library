@@ -7,7 +7,8 @@ This is an AI English Tutor application that provides personalized, interactive 
 - ✅ **Character First Greeting**: Tutor automatically introduces themselves and starts conversation on page load
 - ✅ **Real-time Voice Chat**: Seamless speech recognition → character response → TTS audio playback flow
 - ✅ **Natural Conversation Flow**: Messages display in chat bubbles with audio playback and accuracy scores
-- ✅ **Supertone TTS Integration**: Working audio generation with proper voice synthesis
+- ✅ **Advanced TTS System**: Multi-tier fallback (OpenAI → Supertone → Browser TTS) for reliable audio
+- ✅ **Cost-Effective Audio**: OpenAI TTS integration ($15/1M chars) with character-specific voice selection
 - ✅ **Error Recovery**: Robust error handling with fallback responses for failed API calls
 
 # User Preferences

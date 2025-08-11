@@ -11,6 +11,7 @@ import { generateCharacterImage } from "./services/openai";
 import { generateDialogue } from "./services/openai";
 import { recognizeSpeech, generateConversationResponse } from "./services/speech-recognition";
 import { generateTTS } from "./services/supertone";
+import { generateOpenAITTS, getOpenAIVoiceForCharacter } from "./services/openai-tts";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Character Image Generation
@@ -73,12 +74,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Text-to-Speech Generation
+  // Text-to-Speech Generation with OpenAI fallback
   app.post("/api/tts", async (req, res) => {
     try {
       const validatedData = ttsRequestSchema.parse(req.body);
+      
+      // Try OpenAI TTS first (much cheaper and more reliable)
+      try {
+        console.log("Trying OpenAI TTS...");
+        const voice = getOpenAIVoiceForCharacter(
+          validatedData.character?.style || 'friendly', 
+          validatedData.character?.gender || 'female'
+        );
+        
+        const audioUrl = await generateOpenAITTS(validatedData.text, voice);
+        res.json({ audioUrl });
+        return;
+      } catch (openaiError) {
+        console.log("OpenAI TTS failed, trying Supertone fallback:", openaiError);
+      }
+      
+      // Fallback to Supertone if OpenAI fails
       const result = await generateTTS(validatedData);
       res.json(result);
+      
     } catch (error) {
       console.error("TTS generation error:", error);
       res.status(500).json({ 

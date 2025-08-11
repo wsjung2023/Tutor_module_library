@@ -69,7 +69,11 @@ export const generateDialogueRequestSchema = z.object({
 
 export const ttsRequestSchema = z.object({
   text: z.string().min(1),
-  voiceId: z.string().min(1),
+  voiceId: z.string().min(1).optional(),
+  character: z.object({
+    style: z.string().optional(),
+    gender: z.string().optional(),
+  }).optional(),
 });
 
 export const speechRecognitionRequestSchema = z.object({
