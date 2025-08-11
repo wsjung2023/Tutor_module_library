@@ -120,10 +120,19 @@ export default function DramaScene() {
       // Auto-play opening line
       setTimeout(() => {
         if (audioRef.current && ttsResponse.audioUrl) {
+          console.log('Playing opening audio:', ttsResponse.audioUrl.substring(0, 50) + '...');
           audioRef.current.src = ttsResponse.audioUrl;
-          audioRef.current.play().catch(console.error);
+          audioRef.current.play()
+            .then(() => console.log('Audio playback started'))
+            .catch(error => {
+              console.error('Audio playback failed:', error);
+              toast({
+                title: "Audio Error",
+                description: "Click the play button to hear the character speak.",
+              });
+            });
         }
-      }, 1000);
+      }, 1500);
       
     } catch (error) {
       console.error('Failed to start scenario:', error);
@@ -292,10 +301,21 @@ export default function DramaScene() {
           setSceneProgress(prev => Math.min(prev + 15, 100));
           
           // Play character response
-          if (audioRef.current && ttsResponse.audioUrl) {
-            audioRef.current.src = ttsResponse.audioUrl;
-            audioRef.current.play();
-          }
+          setTimeout(() => {
+            if (audioRef.current && ttsResponse.audioUrl) {
+              console.log('Playing character response audio');
+              audioRef.current.src = ttsResponse.audioUrl;
+              audioRef.current.play()
+                .then(() => console.log('Character response audio played'))
+                .catch(error => {
+                  console.error('Character audio failed:', error);
+                  toast({
+                    title: "Audio Playback Issue",
+                    description: "Use the replay button if needed.",
+                  });
+                });
+            }
+          }, 500);
           
           // Show feedback
           if (contextualResponse.feedback) {
@@ -379,8 +399,18 @@ Respond in JSON format:
 
   const playAudio = (turn: DialogueTurn) => {
     if (turn.audioUrl && audioRef.current) {
+      console.log('Manual play audio triggered');
       audioRef.current.src = turn.audioUrl;
-      audioRef.current.play();
+      audioRef.current.play()
+        .then(() => console.log('Manual audio playback successful'))
+        .catch(error => {
+          console.error('Manual audio playback failed:', error);
+          toast({
+            title: "Audio Playback Failed",
+            description: "Try refreshing the page or check your audio settings.",
+            variant: "destructive"
+          });
+        });
     }
   };
 
@@ -581,8 +611,28 @@ Respond in JSON format:
           </div>
         </div>
 
-        {/* Hidden audio element */}
-        <audio ref={audioRef} />
+        {/* Audio element with controls for debugging */}
+        <audio 
+          ref={audioRef} 
+          controls={false}
+          preload="auto"
+          onError={(e) => console.error('Audio element error:', e)}
+          onCanPlay={() => console.log('Audio can play')}
+          onPlay={() => console.log('Audio started playing')}
+          onPause={() => console.log('Audio paused')}
+        />
+        
+        {/* Debug audio player - remove this later */}
+        <div className="fixed bottom-2 left-2 bg-black bg-opacity-75 text-white p-2 rounded text-xs">
+          <div>Audio Debug</div>
+          {dialogueHistory.filter(d => d.audioUrl).length > 0 && (
+            <audio 
+              controls 
+              src={dialogueHistory.filter(d => d.audioUrl)[0]?.audioUrl}
+              className="w-32 h-6"
+            />
+          )}
+        </div>
       </div>
     </div>
   );
