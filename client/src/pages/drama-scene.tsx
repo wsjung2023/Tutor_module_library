@@ -124,7 +124,7 @@ export default function DramaScene() {
       // Add system message about the scenario
       const systemTurn: DialogueTurn = {
         speaker: 'system',
-        text: `🎬 Scene: ${scenarioConfig.situation}\nYour role: ${scenarioConfig.userRole}\n${character.name}'s role: ${scenarioConfig.characterRole}`
+        text: `🎬 Scene: ${scenarioConfig?.situation || 'English practice'}\nYour role: ${scenarioConfig?.userRole || 'Student'}\n${character.name}'s role: ${scenarioConfig?.characterRole || 'Teacher'}`
       };
       
       console.log('Setting dialogue history...');
@@ -178,7 +178,7 @@ export default function DramaScene() {
       
       const systemTurn: DialogueTurn = {
         speaker: 'system',
-        text: `🎬 Scene: ${scenarioConfig.situation}\nYour role: ${scenarioConfig.userRole}\n${character.name}'s role: ${scenarioConfig.characterRole}`
+        text: `🎬 Scene: ${scenarioConfig?.situation || 'English practice'}\nYour role: ${scenarioConfig?.userRole || 'Student'}\n${character.name}'s role: ${scenarioConfig?.characterRole || 'Teacher'}`
       };
       
       setDialogueHistory([systemTurn, openingTurn]);
@@ -336,7 +336,7 @@ export default function DramaScene() {
             text: contextualResponse.text,
             audioUrl: ttsResponse.audioUrl,
             feedback: contextualResponse.feedback,
-            emotion: contextualResponse.emotion
+            emotion: (contextualResponse.emotion as 'neutral' | 'happy' | 'concerned' | 'professional') || 'professional'
           };
           
           setDialogueHistory(prev => [...prev, characterResponse]);
