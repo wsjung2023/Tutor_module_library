@@ -185,9 +185,9 @@ export default function InteractivePlayground() {
             language: 'en'
           });
           
-          userText = speechResult.text;
+          userText = speechResult.text || '';
           
-          if (!userText.trim()) {
+          if (!userText || !userText.trim()) {
             toast({
               title: "No speech detected",
               description: "I couldn't hear you clearly. Please try speaking again.",
@@ -207,63 +207,77 @@ export default function InteractivePlayground() {
           setConversationHistory(prev => [...prev, userTurn]);
           
           // Generate character response
-          console.log('Sending conversation request:', {
-            userInput: userText,
-            character: character.name,
-            style: character.style,
-            topic: currentTopic
-          });
-          
-          const responseResult: any = await apiRequest('POST', '/api/conversation-response', {
-            userInput: userText,
-            conversationHistory: conversationHistory.map(turn => ({
-              speaker: turn.speaker,
-              text: turn.text
-            })),
-            character: {
-              name: character.name,
-              style: character.style
-            },
-            topic: currentTopic
-          });
-          
-          console.log('Character response received:', responseResult);
-          
-          // Generate TTS for character response
-          const ttsResponse: any = await apiRequest('POST', '/api/tts', {
-            text: responseResult.response,
-            voiceId: 'female_friendly'
-          });
-          
-          const characterTurn: ConversationTurn = {
-            speaker: 'character',
-            text: responseResult.response,
-            audioUrl: ttsResponse.audioUrl,
-            timestamp: Date.now(),
-            feedback: responseResult.feedback
-          };
-          
-          setConversationHistory(prev => [...prev, characterTurn]);
-          
-          // Play character response
-          if (audioRef.current && ttsResponse.audioUrl) {
-            audioRef.current.src = ttsResponse.audioUrl;
-            audioRef.current.play();
-          }
-          
-          // Show feedback if provided
-          if (responseResult.feedback) {
-            const accuracy = responseResult.feedback.accuracy;
-            let message = `Great job!`;
-            if (accuracy < 70) {
-              message = `Good effort! Let's keep practicing.`;
-            } else if (accuracy < 85) {
-              message = `Well done! You're improving.`;
+          try {
+            const responseResult: any = await apiRequest('POST', '/api/conversation-response', {
+              userInput: userText,
+              conversationHistory: conversationHistory.map(turn => ({
+                speaker: turn.speaker,
+                text: turn.text
+              })),
+              character: {
+                name: character.name,
+                style: character.style
+              },
+              topic: currentTopic
+            });
+            
+            if (!responseResult.response) {
+              throw new Error('No response received from character');
             }
             
+            // Generate TTS for character response
+            const ttsResponse: any = await apiRequest('POST', '/api/tts', {
+              text: responseResult.response,
+              voiceId: 'female_friendly'
+            });
+            
+            const characterTurn: ConversationTurn = {
+              speaker: 'character',
+              text: responseResult.response,
+              audioUrl: ttsResponse.audioUrl,
+              timestamp: Date.now(),
+              feedback: responseResult.feedback
+            };
+            
+            setConversationHistory(prev => [...prev, characterTurn]);
+            
+            // Play character response
+            if (audioRef.current && ttsResponse.audioUrl) {
+              audioRef.current.src = ttsResponse.audioUrl;
+              audioRef.current.play();
+            }
+            
+            // Show feedback if provided
+            if (responseResult.feedback) {
+              const accuracy = responseResult.feedback.accuracy;
+              let message = `Great job!`;
+              if (accuracy < 70) {
+                message = `Good effort! Let's keep practicing.`;
+              } else if (accuracy < 85) {
+                message = `Well done! You're improving.`;
+              }
+              
+              toast({
+                title: `Speaking Accuracy: ${accuracy}%`,
+                description: message,
+              });
+            }
+            
+          } catch (conversationError) {
+            console.error('Failed to generate character response:', conversationError);
+            
+            // Add a fallback response
+            const fallbackTurn: ConversationTurn = {
+              speaker: 'character',
+              text: `I heard you say "${userText}". That's interesting! Could you tell me more about that?`,
+              timestamp: Date.now()
+            };
+            setConversationHistory(prev => [...prev, fallbackTurn]);
+            
             toast({
-              title: `Speaking Accuracy: ${accuracy}%`,
-              description: message,
+              title: "Character Response Error",
+              description: "Using fallback response.",
+              variant: "destructive",
             });
           }
           
