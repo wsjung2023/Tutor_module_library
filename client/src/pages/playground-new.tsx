@@ -41,9 +41,10 @@ export default function InteractivePlayground() {
   // Initialize conversation with character greeting
   useEffect(() => {
     if (character.name && conversationHistory.length === 0) {
+      console.log('Starting conversation with character:', character.name);
       startConversation();
     }
-  }, [character.name]);
+  }, [character.name, conversationHistory.length]);
 
   const startConversation = async () => {
     const greeting = `Hello! I'm ${character.name}. I'm excited to practice English with you today. Let's start by talking about ${currentTopic.toLowerCase()}. How are you feeling today?`;
@@ -54,10 +55,9 @@ export default function InteractivePlayground() {
       timestamp: Date.now()
     };
 
-    setConversationHistory([greetingTurn]);
-
-    // Generate TTS for greeting
+    // Generate TTS for greeting first
     try {
+      console.log('Generating TTS for greeting...');
       const ttsResponse: any = await apiRequest('POST', '/api/tts', {
         text: greeting,
         voiceId: 'female_friendly'
@@ -66,13 +66,18 @@ export default function InteractivePlayground() {
       greetingTurn.audioUrl = ttsResponse.audioUrl;
       setConversationHistory([greetingTurn]);
       
-      // Play the greeting
-      if (audioRef.current && ttsResponse.audioUrl) {
-        audioRef.current.src = ttsResponse.audioUrl;
-        audioRef.current.play();
-      }
+      // Automatically play the greeting when page loads
+      setTimeout(() => {
+        if (audioRef.current && ttsResponse.audioUrl) {
+          audioRef.current.src = ttsResponse.audioUrl;
+          audioRef.current.play().catch(e => console.log('Autoplay blocked:', e));
+        }
+      }, 1000);
+      
     } catch (error) {
       console.error('Failed to generate greeting audio:', error);
+      // Still add the greeting text even if TTS fails
+      setConversationHistory([greetingTurn]);
     }
   };
 
@@ -207,6 +212,7 @@ export default function InteractivePlayground() {
           setConversationHistory(prev => [...prev, userTurn]);
           
           // Generate character response
+          console.log('Calling conversation response API...');
           try {
             const responseResult: any = await apiRequest('POST', '/api/conversation-response', {
               userInput: userText,
@@ -221,7 +227,9 @@ export default function InteractivePlayground() {
               topic: currentTopic
             });
             
-            if (!responseResult.response) {
+            console.log('Conversation response result:', responseResult);
+            
+            if (!responseResult || !responseResult.response) {
               throw new Error('No response received from character');
             }
             
