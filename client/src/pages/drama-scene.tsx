@@ -67,6 +67,7 @@ export default function DramaScene() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [sceneProgress, setSceneProgress] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [autoListenMode, setAutoListenMode] = useState(false);
   
   // Audio refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -77,10 +78,17 @@ export default function DramaScene() {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (character.name && scenario.presetKey) {
+    console.log('Drama scene effect triggered:', { 
+      characterName: character.name, 
+      scenarioKey: scenario.presetKey,
+      historyLength: dialogueHistory.length 
+    });
+    
+    if (character.name && scenario.presetKey && dialogueHistory.length === 0) {
+      console.log('Initializing scene...');
       initializeScene();
     }
-  }, [character.name, scenario.presetKey]);
+  }, [character.name, scenario.presetKey, dialogueHistory.length]);
 
   const initializeScene = () => {
     // Get scenario config
@@ -92,19 +100,24 @@ export default function DramaScene() {
   };
 
   const startScenario = async (scenarioConfig: ScenarioConfig) => {
+    console.log('Starting scenario with config:', scenarioConfig);
     const openingLine = generateOpeningLine(scenarioConfig);
+    console.log('Generated opening line:', openingLine);
     
     try {
+      console.log('Calling TTS API...');
       // Generate character's opening dialogue with TTS
       const ttsResponse: any = await apiRequest('POST', '/api/tts', {
         text: openingLine,
         voiceId: 'female_friendly'
       });
       
+      console.log('TTS Response received:', ttsResponse ? 'Success' : 'Failed');
+      
       const openingTurn: DialogueTurn = {
         speaker: 'character',
         text: openingLine,
-        audioUrl: ttsResponse.audioUrl,
+        audioUrl: ttsResponse?.audioUrl,
         emotion: 'professional'
       };
       
@@ -114,33 +127,62 @@ export default function DramaScene() {
         text: `🎬 Scene: ${scenarioConfig.situation}\nYour role: ${scenarioConfig.userRole}\n${character.name}'s role: ${scenarioConfig.characterRole}`
       };
       
+      console.log('Setting dialogue history...');
       setDialogueHistory([systemTurn, openingTurn]);
       setSceneProgress(10);
       
       // Auto-play opening line
-      setTimeout(() => {
-        if (audioRef.current && ttsResponse.audioUrl) {
-          console.log('Playing opening audio:', ttsResponse.audioUrl.substring(0, 50) + '...');
-          audioRef.current.src = ttsResponse.audioUrl;
-          audioRef.current.play()
-            .then(() => console.log('Audio playback started'))
-            .catch(error => {
-              console.error('Audio playback failed:', error);
-              toast({
-                title: "Audio Error",
-                description: "Click the play button to hear the character speak.",
+      if (ttsResponse?.audioUrl) {
+        setTimeout(() => {
+          if (audioRef.current) {
+            console.log('Playing opening audio:', ttsResponse.audioUrl.substring(0, 50) + '...');
+            audioRef.current.src = ttsResponse.audioUrl;
+            audioRef.current.play()
+              .then(() => {
+                console.log('Audio playback started');
+                toast({
+                  title: `🎭 ${character.name} is speaking!`,
+                  description: "The scene has begun. Listen and respond when ready."
+                });
+              })
+              .catch(error => {
+                console.error('Audio playback failed:', error);
+                toast({
+                  title: "Audio Issue",
+                  description: "Click the replay button to hear the character.",
+                });
               });
-            });
-        }
-      }, 1500);
+          }
+        }, 1500);
+      } else {
+        toast({
+          title: "Scene Started",
+          description: `${character.name} is ready! Use the replay button for audio.`,
+        });
+      }
       
     } catch (error) {
       console.error('Failed to start scenario:', error);
       toast({
         title: "Scene Setup Error",
-        description: "Couldn't initialize the scene properly.",
+        description: "Starting without audio. You can still practice the conversation!",
         variant: "destructive"
       });
+      
+      // Still create the dialogue even if TTS fails
+      const openingTurn: DialogueTurn = {
+        speaker: 'character',
+        text: openingLine,
+        emotion: 'professional'
+      };
+      
+      const systemTurn: DialogueTurn = {
+        speaker: 'system',
+        text: `🎬 Scene: ${scenarioConfig.situation}\nYour role: ${scenarioConfig.userRole}\n${character.name}'s role: ${scenarioConfig.characterRole}`
+      };
+      
+      setDialogueHistory([systemTurn, openingTurn]);
+      setSceneProgress(10);
     }
   };
 
@@ -414,9 +456,38 @@ Respond in JSON format:
     }
   };
 
+  const startContinuousListening = async () => {
+    if (!autoListenMode) return;
+    
+    try {
+      await startListening();
+    } catch (error) {
+      console.error('Auto listen failed:', error);
+      setAutoListenMode(false);
+    }
+  };
+
+  // Auto-listen after character finishes speaking
+  useEffect(() => {
+    if (autoListenMode && dialogueHistory.length > 0) {
+      const lastTurn = dialogueHistory[dialogueHistory.length - 1];
+      if (lastTurn.speaker === 'character' && !isListening && !isProcessing) {
+        // Start listening 2 seconds after character finishes
+        const timeout = setTimeout(() => {
+          if (autoListenMode && !isListening && !isProcessing) {
+            startListening();
+          }
+        }, 2000);
+        
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [dialogueHistory, autoListenMode, isListening, isProcessing]);
+
   const resetScene = () => {
     setDialogueHistory([]);
     setSceneProgress(0);
+    setAutoListenMode(false);
     if (currentScenario) {
       startScenario(currentScenario);
     }
@@ -572,14 +643,31 @@ Respond in JSON format:
 
           <div className="flex justify-center gap-4">
             {!isListening && !isProcessing && (
-              <Button
-                size="lg"
-                onClick={startListening}
-                className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8 py-4"
-              >
-                <Mic className="w-5 h-5 mr-2" />
-                🎬 ACTION!
-              </Button>
+              <>
+                <Button
+                  size="lg"
+                  onClick={startListening}
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8 py-4"
+                >
+                  <Mic className="w-5 h-5 mr-2" />
+                  🎬 ACTION!
+                </Button>
+                
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    setAutoListenMode(!autoListenMode);
+                    if (!autoListenMode) {
+                      startContinuousListening();
+                    }
+                  }}
+                  variant={autoListenMode ? "destructive" : "outline"}
+                  className="rounded-full px-6 py-4"
+                >
+                  <Mic className="w-4 h-4 mr-2" />
+                  {autoListenMode ? "Stop Auto" : "Auto Listen"}
+                </Button>
+              </>
             )}
 
             {isListening && (
