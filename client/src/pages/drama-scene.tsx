@@ -148,15 +148,18 @@ export default function DramaScene() {
     try {
       console.log('Calling TTS API...');
       // Generate character's opening dialogue with TTS
+      const voiceId = getVoiceForCharacter(character.gender, scenarioConfig.characterRole);
+      console.log(`Using voice: ${voiceId} for ${character.gender} ${scenarioConfig.characterRole}`);
+      
       const ttsResponse: any = await apiRequest('POST', '/api/tts', {
         text: openingLine,
-        voiceId: 'female_friendly',
+        voiceId: voiceId,
         character: {
           style: character.style,
           gender: character.gender,
           role: scenarioConfig.characterRole
         },
-        emotion: 'professional'
+        emotion: 'friendly'
       });
       
       console.log('TTS Response received:', ttsResponse ? 'Success' : 'Failed');
@@ -303,6 +306,19 @@ export default function DramaScene() {
     setAudioLevel(0);
   };
 
+  const getVoiceForCharacter = (gender: string, role: string) => {
+    if (gender === 'female') {
+      if (role === 'Server' || role === 'Cafeteria Staff') return 'alloy';
+      if (role === 'Flight Attendant') return 'nova';
+      if (role === 'Concierge') return 'shimmer';
+      return 'alloy'; // default female voice
+    } else {
+      if (role === 'Barista') return 'onyx';
+      if (role === 'Business Executive') return 'echo';
+      return 'echo'; // default male voice
+    }
+  };
+
   const visualizeAudio = () => {
     if (!analyserRef.current) return;
     
@@ -362,15 +378,16 @@ export default function DramaScene() {
           const contextualResponse = await generateContextualResponse(userText);
           
           // Generate TTS for character response with character info
+          const voiceId = getVoiceForCharacter(character.gender, currentScenario?.characterRole || 'Teacher');
           const ttsResponse: any = await apiRequest('POST', '/api/tts', {
             text: contextualResponse.text,
-            voiceId: 'female_friendly',
+            voiceId: voiceId,
             character: {
               style: character.style,
               gender: character.gender,
               role: currentScenario?.characterRole
             },
-            emotion: contextualResponse.emotion || 'professional'
+            emotion: contextualResponse.emotion || 'friendly'
           });
           
           const characterResponse: DialogueTurn = {
@@ -505,21 +522,35 @@ Respond in JSON format:
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.9;
-      utterance.pitch = 1.1;
-      utterance.volume = 0.8;
+      utterance.rate = 0.85;
+      utterance.pitch = character.gender === 'female' ? 1.2 : 0.9;
+      utterance.volume = 0.9;
       
-      // Try to use a female voice
+      // Select appropriate voice based on character gender
       const voices = speechSynthesis.getVoices();
-      const femaleVoice = voices.find(voice => 
-        voice.name.toLowerCase().includes('female') || 
-        voice.name.toLowerCase().includes('woman') ||
-        voice.name.toLowerCase().includes('samantha') ||
-        voice.name.toLowerCase().includes('karen')
-      );
+      let selectedVoice;
       
-      if (femaleVoice) {
-        utterance.voice = femaleVoice;
+      if (character.gender === 'female') {
+        selectedVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('female') || 
+          voice.name.toLowerCase().includes('woman') ||
+          voice.name.toLowerCase().includes('samantha') ||
+          voice.name.toLowerCase().includes('karen') ||
+          voice.name.toLowerCase().includes('zira') ||
+          voice.name.toLowerCase().includes('susan')
+        );
+      } else {
+        selectedVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('male') || 
+          voice.name.toLowerCase().includes('man') ||
+          voice.name.toLowerCase().includes('david') ||
+          voice.name.toLowerCase().includes('mark') ||
+          voice.name.toLowerCase().includes('paul')
+        );
+      }
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
       }
       
       utterance.onstart = () => console.log('Browser TTS started');
