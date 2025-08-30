@@ -83,8 +83,11 @@ interface DialogueTurn {
   audioUrl?: string;
   feedback?: {
     accuracy: number;
-    pronunciation: string;
-    suggestions: string[];
+    pronunciation?: string;
+    suggestions?: string[];
+    needsCorrection?: boolean;
+    koreanExplanation?: string;
+    betterExpression?: string;
   };
   emotion?: 'neutral' | 'happy' | 'concerned' | 'professional';
 }
@@ -101,6 +104,10 @@ export default function DramaScene() {
   const [sceneProgress, setSceneProgress] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [autoListenMode, setAutoListenMode] = useState(false);
+  const [conversationEnded, setConversationEnded] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedConversation, setRecordedConversation] = useState<string[]>([]);
+  const [awaitingRetry, setAwaitingRetry] = useState(false);
   
   // Audio refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -396,8 +403,37 @@ export default function DramaScene() {
           
           setDialogueHistory(prev => [...prev, userTurn]);
           
+          // Record user input for session replay
+          setRecordedConversation(prev => [...prev, `You: ${userText}`]);
+          
           // Generate character's contextual response
           const contextualResponse = await generateContextualResponse(userText);
+          
+          // Check if correction is needed
+          if (contextualResponse.feedback?.needsCorrection) {
+            setAwaitingRetry(true);
+            toast({
+              title: "💬 표현 교정",
+              description: contextualResponse.feedback.koreanExplanation || "다시 한번 말해보세요!",
+              variant: "default",
+            });
+            
+            // Don't add character response, wait for user to retry
+            setIsProcessing(false);
+            return;
+          }
+          
+          // Record character response
+          setRecordedConversation(prev => [...prev, `${character.name}: ${contextualResponse.text}`]);
+          
+          // Check if conversation should end
+          if (contextualResponse.shouldEndConversation) {
+            setConversationEnded(true);
+            toast({
+              title: "🎬 시나리오 완료",
+              description: "대화가 자연스럽게 마무리되었습니다!",
+            });
+          }
           
           // Generate TTS for character response with character info
           const voiceId = getVoiceForCharacter(character.gender, currentScenario?.characterRole || 'Teacher');
@@ -431,17 +467,23 @@ export default function DramaScene() {
           }, 500);
           
           // Show feedback with better expression suggestions
-          if (contextualResponse.feedback) {
-            const { accuracy, pronunciation, betterExpression } = contextualResponse.feedback;
+          if (contextualResponse.feedback && !contextualResponse.feedback.needsCorrection) {
+            const { accuracy, betterExpression } = contextualResponse.feedback;
             
-            toast({
-              title: `🎭 표현력 점수: ${accuracy}%`,
-              description: betterExpression ? 
-                `더 자연스러운 표현: "${betterExpression}"` :
-                pronunciation === 'excellent' ? "완벽한 발음이에요!" : 
-                pronunciation === 'good' ? "훌륭해요!" : "발음 연습을 더 해보세요!",
-            });
+            if (betterExpression) {
+              toast({
+                title: `💡 더 자연스러운 표현 (${accuracy}점)`,
+                description: `"${betterExpression}" 이렇게 말하면 더 좋아요!`,
+              });
+            } else if (accuracy >= 90) {
+              toast({
+                title: "✨ 완벽해요!",
+                description: `정확도 ${accuracy}% - 훌륭한 표현입니다!`,
+              });
+            }
           }
+          
+          setAwaitingRetry(false);
           
         } catch (error) {
           console.error('Processing error:', error);
@@ -511,7 +553,8 @@ Respond in JSON format:
       return {
         text: response.response || "That's interesting! Please continue.",
         feedback: response.feedback || { accuracy: 80, pronunciation: 'good', suggestions: [] },
-        emotion: 'professional'
+        emotion: 'professional',
+        shouldEndConversation: response.shouldEndConversation || false
       };
       
     } catch (error) {
@@ -739,16 +782,16 @@ Respond in JSON format:
             </div>
           )}
 
-          <div className="flex justify-center gap-2">
-            {!isListening && !isProcessing && (
+          <div className="flex justify-center gap-2 flex-wrap">
+            {!conversationEnded && !isListening && !isProcessing && (
               <>
                 <Button
                   size="sm"
                   onClick={startListening}
-                  className="bg-red-600 hover:bg-red-700 text-white rounded-full px-4 py-2"
+                  className={`rounded-full px-4 py-2 ${awaitingRetry ? 'bg-orange-600 hover:bg-orange-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
                 >
                   <Mic className="w-4 h-4 mr-1" />
-                  ACTION
+                  {awaitingRetry ? "다시 말하기" : "ACTION"}
                 </Button>
                 
                 <Button
@@ -767,7 +810,50 @@ Respond in JSON format:
                 >
                   📝 Script
                 </Button>
+                
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setIsRecording(!isRecording);
+                    toast({
+                      title: isRecording ? "🔴 녹음 시작" : "⏹️ 녹음 중지",
+                      description: isRecording ? "대화가 녹음됩니다" : "녹음이 중지되었습니다",
+                    });
+                  }}
+                  variant={isRecording ? "destructive" : "outline"}
+                  className="rounded-full px-3 py-2"
+                >
+                  {isRecording ? "🔴" : "⚫"} 녹음
+                </Button>
               </>
+            )}
+
+            {conversationEnded && (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={resetScene}
+                  className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 py-2"
+                >
+                  🔄 다시 시작
+                </Button>
+                
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const conversation = recordedConversation.join('\n');
+                    toast({
+                      title: "📝 대화 기록",
+                      description: `${recordedConversation.length}개의 대화가 기록되었습니다`,
+                    });
+                    console.log("Full conversation:", conversation);
+                  }}
+                  variant="secondary"
+                  className="rounded-full px-3 py-2"
+                >
+                  📝 대화보기
+                </Button>
+              </div>
             )}
 
             {isListening && (
@@ -784,15 +870,25 @@ Respond in JSON format:
 
             {isProcessing && (
               <Button size="sm" disabled className="rounded-full px-4 py-2">
-                Processing...
+                {awaitingRetry ? "교정 중..." : "Processing..."}
               </Button>
             )}
           </div>
 
           <div className="text-center mt-2">
-            <p className="text-white text-xs">
-              🎭 You: {currentScenario.userRole} | {character.name}: {currentScenario.characterRole}
-            </p>
+            {conversationEnded ? (
+              <p className="text-green-400 text-xs">
+                🎬 시나리오 완료! 총 {recordedConversation.length}개의 대화 교환
+              </p>
+            ) : awaitingRetry ? (
+              <p className="text-orange-400 text-xs">
+                💬 표현을 교정했습니다. 다시 말해보세요!
+              </p>
+            ) : (
+              <p className="text-white text-xs">
+                🎭 You: {currentScenario.userRole} | {character.name}: {currentScenario.characterRole}
+              </p>
+            )}
           </div>
         </div>
 
