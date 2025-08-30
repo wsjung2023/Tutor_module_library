@@ -94,11 +94,11 @@ export default function Character() {
       });
       return;
     }
-    setCurrentPage('scenario'); // 캐릭터 생성 후 시나리오 선택
+    setCurrentPage('playground'); // 캐릭터 생성 후 바로 플레이그라운드
   };
 
   const handleBack = () => {
-    setCurrentPage('home'); // 캐릭터에서 뒤로 = 대상선택
+    setCurrentPage('scenario'); // 캐릭터에서 뒤로 = 시나리오
   };
 
   return (

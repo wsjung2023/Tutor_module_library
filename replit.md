@@ -60,8 +60,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Application Flow
 1. **Audience Selection**: Three-tier system (student/general/business) with different themes and scenarios
-2. **Character Creation**: Form-based character definition (name, gender, style) with AI image generation
-3. **Scenario Selection**: Preset scenarios per audience or custom text input
+2. **Scenario Selection**: Preset scenarios per audience or custom text input
+3. **Character Creation**: Form-based character definition (name, gender, style) with AI image generation
 4. **Playground**: Interactive learning environment with AI-generated dialogue and TTS audio
 
 ## External Dependencies

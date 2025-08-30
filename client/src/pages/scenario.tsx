@@ -50,11 +50,11 @@ export default function Scenario() {
       });
       return;
     }
-    setCurrentPage('playground'); // 시나리오 선택 후 플레이그라운드
+    setCurrentPage('character'); // 시나리오 선택 후 캐릭터
   };
 
   const handleBack = () => {
-    setCurrentPage('character'); // 시나리오에서 뒤로 = 캐릭터
+    setCurrentPage('home'); // 시나리오에서 뒤로 = 대상선택
   };
 
   return (
@@ -140,7 +140,7 @@ export default function Scenario() {
               onClick={handleNext}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700"
             >
-              Start Learning <i className="fas fa-arrow-right ml-2"></i>
+              Next: Character <i className="fas fa-arrow-right ml-2"></i>
             </Button>
           </div>
         </div>
