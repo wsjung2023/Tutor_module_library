@@ -414,8 +414,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pose = getPoseForStyle(style);
       const styleCharacteristics = styleMap[style as keyof typeof styleMap] || "friendly expression";
 
-      // Create comprehensive prompt with scenario context
-      const comprehensivePrompt = `A ${gender} English tutor character named ${name} with ${styleCharacteristics}, ${outfit}, ${pose}. Setting: ${background}. High-quality digital illustration, professional anime/cartoon style, warm and approachable for ${audience} English learning. Ultra-detailed, clean composition, educational character design, 8K quality.`;
+      // Create comprehensive prompt with scenario context following user requirements
+      const comprehensivePrompt = `FULL LENGTH BODY SHOT: Professional photograph of a real human ${gender} person, ENTIRE BODY visible from head to feet, standing ${pose}, wearing ${outfit}, at ${background}. 
+
+MANDATORY FRAMING: Complete figure visible - head at top 20% of image, feet at bottom 10% of image, showing shoes/footwear. Person should occupy 60-70% of image height to ensure full body is captured without cropping any limbs.
+
+CAMERA SETUP: Positioned 8-10 feet back from subject, wide angle lens (24-35mm equivalent), vertical orientation, adequate space above head and below feet.
+
+Ultra photorealistic, natural skin texture, realistic human proportions, professional portrait lighting.
+High quality DSLR shot, f/2.8, soft natural light, balanced exposure.
+
+STRICTLY NO: head-and-shoulders only, waist-up shots, cropped legs, cropped feet, tight framing that cuts off any body parts, illustration, no anime, no 3D render, no doll-like face, no over-smoothing, no plastic skin, no exaggerated eyes.`;
 
       // Generate character image using OpenAI DALL-E
       const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
@@ -428,9 +437,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           model: "dall-e-3",
           prompt: comprehensivePrompt,
           n: 1,
-          size: "1024x1024",
-          quality: "standard",
-          style: "vivid"
+          size: "1024x1792", // Maximum vertical ratio for full body shots
+          quality: "hd", // High quality for realistic images
         }),
       });
 
