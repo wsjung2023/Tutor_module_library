@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const { name, gender, style, audience } = req.body;
+      const { name, gender, style, audience, scenario } = req.body;
       const userId = req.user.id;
 
       // Check usage limits
@@ -357,6 +357,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Define scenario-specific backgrounds
+      const getScenarioBackground = (scenario: string) => {
+        const backgrounds = {
+          restaurant: "elegant restaurant interior with dining tables and ambient lighting",
+          airport: "modern airport terminal with check-in counters and departure boards", 
+          coffee_shop: "trendy coffee shop with espresso machines and cozy seating",
+          office: "professional corporate office with modern furniture",
+          school: "bright classroom with educational materials and whiteboards",
+          hotel: "luxurious hotel lobby with reception desk and elegant decor",
+          shopping_mall: "modern shopping center with stores and shoppers",
+          hospital: "clean medical facility with professional healthcare setting",
+          bank: "professional banking environment with teller counters",
+          library: "quiet library with bookshelves and study areas"
+        };
+        return backgrounds[scenario as keyof typeof backgrounds] || "professional indoor setting";
+      };
+
+      // Define style characteristics
+      const styleMap = {
+        cheerful: "bright smile, friendly expression, energetic pose",
+        calm: "serene expression, gentle demeanor, relaxed posture", 
+        strict: "serious expression, professional appearance, confident stance"
+      };
+
+      // Get scenario-specific background
+      const background = scenario ? getScenarioBackground(scenario) : `professional setting suitable for ${audience} level English learning`;
+      
+      // Get appropriate outfit and pose based on scenario and style
+      const getOutfitForScenario = (scenario: string, style: string) => {
+        const outfits = {
+          restaurant: style === 'strict' ? 'formal server uniform, black apron' : 'casual restaurant uniform, friendly smile',
+          airport: 'professional flight attendant uniform, name badge',
+          coffee_shop: 'casual barista apron over comfortable clothing',
+          office: 'professional business attire, suit or blazer',
+          hotel: 'elegant concierge uniform, professional appearance',
+          school: 'professional teacher attire, educational setting appropriate',
+          shopping_mall: 'retail employee uniform or casual professional attire',
+          hospital: 'medical professional attire, clean and professional',
+          bank: 'formal business attire, professional banking appearance',
+          library: 'librarian or academic professional attire'
+        };
+        return outfits[scenario as keyof typeof outfits] || 'professional casual attire';
+      };
+
+      const getPoseForStyle = (style: string) => {
+        const poses: Record<string, string> = {
+          cheerful: 'standing confidently with warm welcoming gesture',
+          calm: 'standing peacefully with relaxed, approachable posture',
+          strict: 'standing professionally with confident, authoritative stance'
+        };
+        return poses[style] || 'standing naturally with friendly posture';
+      };
+
+      const outfit = getOutfitForScenario(scenario || 'restaurant', style);
+      const pose = getPoseForStyle(style);
+      const styleCharacteristics = styleMap[style as keyof typeof styleMap] || "friendly expression";
+
+      // Create comprehensive prompt with scenario context
+      const comprehensivePrompt = `A ${gender} English tutor character named ${name} with ${styleCharacteristics}, ${outfit}, ${pose}. Setting: ${background}. High-quality digital illustration, professional anime/cartoon style, warm and approachable for ${audience} English learning. Ultra-detailed, clean composition, educational character design, 8K quality.`;
+
       // Generate character image using OpenAI DALL-E
       const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
@@ -366,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         body: JSON.stringify({
           model: "dall-e-3",
-          prompt: `A friendly ${gender} English tutor character named ${name} with a ${style} personality, designed for ${audience} audience. Professional, clean, anime-style illustration with a warm expression, suitable for educational content.`,
+          prompt: comprehensivePrompt,
           n: 1,
           size: "1024x1024",
           quality: "standard",

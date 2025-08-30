@@ -4,10 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 export function DebugPanel() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
-  // Always show for debugging
-  // if (import.meta.env.MODE !== 'development') {
-  //   return null;
-  // }
+  // Hide debug panel in production and when not explicitly enabled
+  if (import.meta.env.MODE !== 'development' || !import.meta.env.VITE_SHOW_DEBUG) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded text-xs max-w-sm">
