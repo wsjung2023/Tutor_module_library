@@ -172,15 +172,14 @@ export function setupAuth(app: Express) {
     res.json(req.user);
   });
 
-  // Logout endpoint
-  app.post("/api/logout", (req, res, next) => {
+  // Logout endpoints (both GET and POST for flexibility)
+  app.get("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
-      res.json({ message: "Logged out successfully" });
+      res.redirect("/");
     });
   });
 
-  // Logout endpoint
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);

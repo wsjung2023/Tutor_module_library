@@ -104,7 +104,16 @@ export default function NavigationHeader() {
             <Button 
               variant="outline"
               size="sm"
-              onClick={() => window.location.href = '/api/logout'}
+              onClick={async () => {
+                try {
+                  await fetch('/api/logout', { method: 'POST' });
+                  window.location.reload();
+                } catch (error) {
+                  console.error('Logout error:', error);
+                  // Fallback to GET request
+                  window.location.href = '/api/logout';
+                }
+              }}
               data-testid="nav-logout"
             >
               로그아웃
