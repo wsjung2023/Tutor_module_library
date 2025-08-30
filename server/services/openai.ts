@@ -32,14 +32,37 @@ export async function generateCharacterImage(request: GenerateImageRequest): Pro
   // Get scenario-specific background
   const background = scenario ? getScenarioBackground(scenario) : `professional setting suitable for ${audience} level English learning`;
   
-  const prompt = `Ultra realistic full-body professional portrait of ${name}, a ${gender} person. 
-    Personality: ${styleMap[style]}. 
-    Background: ${background}. 
-    Photo-realistic, hyperrealistic, 8K resolution, perfect proportions (8-9 head proportions), 
-    professional lighting, detailed facial features, natural skin texture, 
-    realistic hair and clothing appropriate for the setting, studio quality photography, full body shot, 
-    standing pose, photorealistic rendering, commercial photography style.
-    Ultra high definition, masterpiece quality.`;
+  // Get appropriate outfit and pose based on scenario and style
+  const getOutfitForScenario = (scenario: string, style: string) => {
+    const outfits = {
+      restaurant: style === 'strict' ? 'formal server uniform, black apron' : 'casual restaurant uniform, friendly smile',
+      airport: 'professional flight attendant uniform, name badge',
+      coffee_shop: 'casual barista apron over comfortable clothing',
+      business_meeting: 'professional business attire, suit or blazer',
+      hotel: 'elegant concierge uniform, professional appearance',
+      cafeteria: 'casual food service uniform, hair net, friendly demeanor',
+      club: 'casual student clothing, club t-shirt or hoodie'
+    };
+    return outfits[scenario as keyof typeof outfits] || 'professional casual attire';
+  };
+
+  const getPoseForStyle = (style: string) => {
+    const poses: Record<string, string> = {
+      cheerful: 'standing confidently with warm welcoming gesture',
+      calm: 'standing peacefully with relaxed, approachable posture',
+      strict: 'standing professionally with confident, authoritative stance'
+    };
+    return poses[style] || 'standing naturally with friendly posture';
+  };
+
+  const outfit = getOutfitForScenario(scenario || 'restaurant', style);
+  const pose = getPoseForStyle(style);
+  
+  const prompt = `A full-length portrait photo of a real human ${gender}, head-to-toe fully visible in frame, standing ${pose}, wearing ${outfit}, at ${background}.
+Ultra photorealistic, unedited RAW look, natural skin texture and pores, realistic proportions.
+Shot on DSLR, 35–50mm lens, f/2.8, soft natural light, slight film grain, shallow depth of field, balanced colors.
+Composition: vertical, full-body, include feet, subject centered, clean background separation (subtle bokeh).
+No illustration, no anime, no 3D render, no doll-like face, no over-smoothing, no plastic skin, no exaggerated eyes.`;
 
   try {
     const response = await openai.images.generate({
