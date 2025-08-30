@@ -1,4 +1,4 @@
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, type AppState } from '@/store/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +19,7 @@ export default function NavigationHeader() {
 
   const isActive = (page: string) => currentPage === page;
 
-  const handleMenuClick = (page: string) => {
+  const handleMenuClick = (page: AppState['currentPage']) => {
     setCurrentPage(page);
     setIsMobileMenuOpen(false);
   };
