@@ -122,33 +122,6 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Developer Tools */}
-        <div className="grid md:grid-cols-1 gap-6 mb-8">
-          <Card 
-            className="hover:shadow-lg transition-shadow cursor-pointer border-purple-200 bg-purple-50" 
-            data-testid="card-module-showcase"
-            onClick={() => setCurrentPage('showcase')}
-          >
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
-                🏗️ SB 모듈 라이브러리
-                <Badge className="bg-purple-500">개발자</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-purple-700">
-                재사용 가능한 SocialBeing 모듈 컬렉션을 확인하고 새로운 앱 개발에 활용하세요. 
-                인증, 결제, AI 기능을 포함한 완전한 모듈 시스템입니다.
-              </CardDescription>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant="outline" className="text-xs">sb_auth</Badge>
-                <Badge variant="outline" className="text-xs">sb_payment</Badge>
-                <Badge variant="outline" className="text-xs">sb_ai</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Recent Activity */}
         <Card className="mb-8">
           <CardHeader>

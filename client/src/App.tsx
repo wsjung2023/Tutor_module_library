@@ -23,7 +23,6 @@ import Scenario from "@/pages/scenario";
 import Playground from "@/pages/playground";
 import NotFound from "@/pages/not-found";
 import AudienceSelection from "@/pages/AudienceSelection";
-import ModuleShowcase from "@/pages/ModuleShowcase";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -48,11 +47,6 @@ function Router() {
   // Show subscription page if accessing subscription route
   if (currentPage === 'subscription') {
     return <Subscription />;
-  }
-
-  // Show module showcase page
-  if (currentPage === 'showcase') {
-    return <ModuleShowcase />;
   }
 
   // Show user home page if accessing user home route
