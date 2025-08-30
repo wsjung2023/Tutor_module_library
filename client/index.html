@@ -30,23 +30,11 @@
     
     <!-- PWA Install Script -->
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('PWA Service Worker registered');
-            })
-            .catch((registrationError) => {
-              console.log('PWA Service Worker registration failed:', registrationError);
-            });
-        });
-      }
+      // PWA Service Worker registration temporarily disabled for debugging
     </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
 </html>
