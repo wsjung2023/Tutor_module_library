@@ -1,7 +1,4 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { SBPricingTier } from '../types/payment';
 
 interface SBPricingPlansProps {
@@ -12,13 +9,8 @@ interface SBPricingPlansProps {
   currency?: string;
 }
 
-export function SBPricingPlans({ 
-  tiers, 
-  currentTier, 
-  onSubscribe, 
-  loading = false,
-  currency = 'KRW'
-}: SBPricingPlansProps) {
+export function SBPricingPlans(props: SBPricingPlansProps) {
+  const { tiers, currentTier, onSubscribe, loading = false, currency = 'KRW' } = props;
   const formatPrice = (price: number, currency: string) => {
     if (currency === 'KRW') {
       return `₩${price.toLocaleString()}`;
@@ -29,44 +21,47 @@ export function SBPricingPlans({
   return (
     <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
       {tiers.map((tier) => (
-        <Card 
+        <div 
           key={tier.id}
-          className={`relative ${tier.popular ? 'border-blue-500 shadow-lg' : ''}`}
+          className={`relative border rounded-lg p-6 ${tier.popular ? 'border-blue-500 shadow-lg' : 'border-gray-200'}`}
         >
           {tier.popular && (
-            <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-500">
+            <span className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
               인기
-            </Badge>
+            </span>
           )}
           
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">{tier.name}</CardTitle>
-            <div className="text-3xl font-bold">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold">{tier.name}</h3>
+            <div className="text-3xl font-bold mt-2">
               {formatPrice(tier.price, tier.currency)}
               <span className="text-sm font-normal text-gray-500">/월</span>
             </div>
-          </CardHeader>
+          </div>
           
-          <CardContent>
+          <div>
             <ul className="space-y-2 mb-6">
               {tier.features.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2">
-                  <i className="fas fa-check text-green-500 text-sm"></i>
+                  <span className="text-green-500">✓</span>
                   <span className="text-sm">{feature}</span>
                 </li>
               ))}
             </ul>
             
-            <Button 
+            <button 
               onClick={() => onSubscribe(tier.id)}
               disabled={loading || currentTier === tier.id}
-              className="w-full"
-              variant={tier.popular ? 'default' : 'outline'}
+              className={`w-full py-2 px-4 rounded transition-colors ${
+                tier.popular 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'border border-gray-300 hover:bg-gray-50'
+              } ${loading || currentTier === tier.id ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {currentTier === tier.id ? '현재 플랜' : '구독하기'}
-            </Button>
-          </CardContent>
-        </Card>
+            </button>
+          </div>
+        </div>
       ))}
     </div>
   );

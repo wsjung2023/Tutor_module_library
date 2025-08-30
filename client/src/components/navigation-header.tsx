@@ -228,6 +228,18 @@ export default function NavigationHeader() {
                 <i className="fas fa-cubes mr-2"></i> 모듈 라이브러리
               </button>
 
+              <button 
+                onClick={() => handleMenuClick('showcase')}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('showcase') 
+                    ? 'text-purple-600 bg-purple-50' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                data-testid="mobile-nav-showcase"
+              >
+                <i className="fas fa-cubes mr-2"></i> 모듈 라이브러리
+              </button>
+
               {(user as any)?.isAdmin && (
                 <button 
                   onClick={() => handleMenuClick('admin')}
