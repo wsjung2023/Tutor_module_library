@@ -492,7 +492,7 @@ Respond in JSON format:
   "emotion": "professional"
 }`;
 
-      const response: any = await apiRequest('POST', '/api/conversation-response', {
+      const responseRaw = await apiRequest('POST', '/api/conversation-response', {
         userInput,
         conversationHistory: dialogueHistory.map(turn => ({
           speaker: turn.speaker,
@@ -504,6 +504,9 @@ Respond in JSON format:
         },
         topic: currentScenario?.situation || "English conversation"
       });
+      
+      const response = await responseRaw.json();
+      console.log('Generated response:', response.response);
       
       return {
         text: response.response || "That's interesting! Please continue.",
@@ -530,10 +533,6 @@ Respond in JSON format:
         audioRef.current?.play()
           .then(() => {
             console.log('OpenAI TTS audio played successfully');
-            toast({
-              title: "🎭 AI Voice Active",
-              description: "High-quality voice synthesis playing"
-            });
           })
           .catch(error => {
             console.error('OpenAI TTS audio playback failed:', error);
