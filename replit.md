@@ -28,6 +28,13 @@ This is an AI English Tutor application that provides personalized, interactive 
 
 Preferred communication style: Simple, everyday language.
 
+## Development Guidelines (Critical)
+- **NEVER break existing authentication/core systems when adding new features**
+- **Always test incrementally** - make small changes and verify they work before proceeding
+- **Preserve working functionality** - if something works, don't touch it unless absolutely necessary
+- **Document and backup** - before major changes, ensure rollback is possible
+- User is frustrated with repeated system breakdowns during feature development
+
 # System Architecture
 
 ## Frontend Architecture
