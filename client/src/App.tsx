@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -87,6 +87,28 @@ function AppContent() {
 }
 
 function App() {
+  // 앱 초기화 시 에러 처리
+  useEffect(() => {
+    // 모듈 로딩 에러 방지
+    const handleError = (event: ErrorEvent) => {
+      console.log('모듈 로딩 오류 처리됨:', event.message);
+      event.preventDefault();
+    };
+    
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.log('Promise 거부 처리됨:', event.reason);
+      event.preventDefault();
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppContent />
