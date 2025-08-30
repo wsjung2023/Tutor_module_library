@@ -5,16 +5,36 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY 
 });
 
-export async function generateOpenAITTS(text: string, voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' = 'nova'): Promise<string> {
+export async function generateOpenAITTS(
+  text: string, 
+  voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' = 'nova',
+  emotion: 'neutral' | 'happy' | 'concerned' | 'professional' | 'excited' | 'calm' = 'neutral',
+  speed: number = 1.0
+): Promise<string> {
   try {
-    console.log(`Generating OpenAI TTS for text: "${text.substring(0, 50)}..."`);
+    console.log(`Generating OpenAI TTS for text: "${text.substring(0, 50)}..." with emotion: ${emotion}`);
+    
+    // Adjust speed based on emotion
+    const emotionSpeeds = {
+      excited: 1.1,
+      happy: 1.05,
+      neutral: 1.0,
+      professional: 0.95,
+      concerned: 0.9,
+      calm: 0.85
+    };
+    
+    const adjustedSpeed = emotionSpeeds[emotion] || speed;
+    
+    // Add emotional context to text when appropriate
+    const emotionalText = addEmotionalContext(text, emotion);
     
     const response = await openai.audio.speech.create({
       model: "tts-1-hd", // High quality model
       voice: voice,
-      input: text,
+      input: emotionalText,
       response_format: "mp3",
-      speed: 1.0
+      speed: adjustedSpeed
     });
 
     // Convert response to base64
@@ -31,20 +51,53 @@ export async function generateOpenAITTS(text: string, voice: 'alloy' | 'echo' | 
   }
 }
 
-// Voice mapping for different character styles
-export function getOpenAIVoiceForCharacter(style: string, gender: string): 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' {
+// Add emotional context to text for better TTS expression
+function addEmotionalContext(text: string, emotion: string): string {
+  const emotionalPrefixes = {
+    excited: text, // Keep natural for excitement
+    happy: text, // Keep natural for happiness  
+    neutral: text,
+    professional: text,
+    concerned: text,
+    calm: text
+  };
+  
+  return emotionalPrefixes[emotion as keyof typeof emotionalPrefixes] || text;
+}
+
+// Voice mapping for different character roles and scenarios
+export function getOpenAIVoiceForCharacter(
+  style: string, 
+  gender: string, 
+  role: string = ''
+): 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' {
+  
+  // Role-based voice selection
+  const roleVoices: Record<string, 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer'> = {
+    'Professional Server': gender === 'female' ? 'nova' : 'onyx',
+    'Flight Attendant': gender === 'female' ? 'shimmer' : 'echo',
+    'Friendly Barista': gender === 'female' ? 'alloy' : 'fable',
+    'Senior Executive': gender === 'female' ? 'nova' : 'onyx',
+    'Concierge': gender === 'female' ? 'shimmer' : 'echo',
+    'Check-in Staff': gender === 'female' ? 'nova' : 'onyx'
+  };
+  
+  // Check if we have a specific voice for this role
+  if (role && roleVoices[role]) {
+    return roleVoices[role];
+  }
+  
   // Female voices
   if (gender.toLowerCase() === 'female') {
     switch (style.toLowerCase()) {
       case 'professional':
-      case 'business':
-        return 'nova'; // Professional female voice
+      case 'strict':
+        return 'nova'; // Professional, clear female voice
+      case 'cheerful':
       case 'friendly':
-      case 'warm':
         return 'shimmer'; // Warm, friendly female voice
-      case 'casual':
-      case 'young':
-        return 'alloy'; // Casual, versatile voice
+      case 'calm':
+        return 'alloy'; // Gentle, versatile voice
       default:
         return 'nova';
     }
@@ -54,14 +107,13 @@ export function getOpenAIVoiceForCharacter(style: string, gender: string): 'allo
   if (gender.toLowerCase() === 'male') {
     switch (style.toLowerCase()) {
       case 'professional':
-      case 'business':
+      case 'strict':
         return 'onyx'; // Deep, professional male voice
+      case 'cheerful':
       case 'friendly':
-      case 'warm':
         return 'echo'; // Warm, friendly male voice
-      case 'casual':
-      case 'young':
-        return 'fable'; // Expressive, storytelling voice
+      case 'calm':
+        return 'fable'; // Gentle, storytelling voice
       default:
         return 'onyx';
     }

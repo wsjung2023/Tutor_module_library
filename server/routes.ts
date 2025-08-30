@@ -84,10 +84,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Trying OpenAI TTS...");
         const voice = getOpenAIVoiceForCharacter(
           validatedData.character?.style || 'friendly', 
-          validatedData.character?.gender || 'female'
+          validatedData.character?.gender || 'female',
+          validatedData.character?.role || ''
         );
         
-        const audioUrl = await generateOpenAITTS(validatedData.text, voice);
+        const emotion = validatedData.emotion || 'neutral';
+        const audioUrl = await generateOpenAITTS(validatedData.text, voice, emotion as any);
         res.json({ audioUrl });
         return;
       } catch (openaiError) {

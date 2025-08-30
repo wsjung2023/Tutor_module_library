@@ -59,6 +59,7 @@ export const generateImageRequestSchema = z.object({
   gender: z.enum(['male', 'female']),
   style: z.enum(['cheerful', 'calm', 'strict']),
   audience: z.enum(['student', 'general', 'business']),
+  scenario: z.string().optional(),
 });
 
 export const generateDialogueRequestSchema = z.object({
@@ -73,7 +74,9 @@ export const ttsRequestSchema = z.object({
   character: z.object({
     style: z.string().optional(),
     gender: z.string().optional(),
+    role: z.string().optional(),
   }).optional(),
+  emotion: z.enum(['neutral', 'happy', 'concerned', 'professional', 'excited', 'calm']).optional(),
 });
 
 export const speechRecognitionRequestSchema = z.object({

@@ -7,13 +7,19 @@ const openai = new OpenAI({
 });
 
 export async function generateCharacterImage(request: GenerateImageRequest): Promise<{ imageUrl: string }> {
-  const { name, gender, style, audience } = request;
+  const { name, gender, style, audience, scenario } = request;
   
-  // Define background based on audience
-  const backgroundMap = {
-    student: "simple classroom setting with desks and chalkboard",
-    general: "cozy cafe with warm lighting and books",
-    business: "modern office environment with professional setting"
+  // Define professional backgrounds based on scenario context
+  const getScenarioBackground = (scenario: string) => {
+    const backgrounds = {
+      restaurant: "elegant restaurant interior with dining tables and ambient lighting",
+      airport: "modern airport terminal with check-in counters and departure boards",
+      coffee_shop: "trendy coffee shop with espresso machines and cozy seating",
+      office: "professional corporate office with modern furniture",
+      school: "bright classroom with educational materials and whiteboards",
+      hotel: "luxurious hotel lobby with reception desk and elegant decor"
+    };
+    return backgrounds[scenario as keyof typeof backgrounds] || "professional indoor setting";
   };
 
   // Define style characteristics
@@ -23,21 +29,25 @@ export async function generateCharacterImage(request: GenerateImageRequest): Pro
     strict: "serious expression, professional appearance, confident stance"
   };
 
-  const prompt = `Create a cartoon-style English tutor character named ${name}. 
-    Gender: ${gender}. 
+  // Get scenario-specific background
+  const background = scenario ? getScenarioBackground(scenario) : `professional setting suitable for ${audience} level English learning`;
+  
+  const prompt = `Ultra realistic full-body professional portrait of ${name}, a ${gender} person. 
     Personality: ${styleMap[style]}. 
-    Background: ${backgroundMap[audience]}. 
-    The character should look approachable and professional, suitable for English language teaching. 
-    Style should be clean, modern cartoon illustration with friendly colors.
-    High quality, detailed illustration.`;
+    Background: ${background}. 
+    Photo-realistic, hyperrealistic, 8K resolution, perfect proportions (8-9 head proportions), 
+    professional lighting, detailed facial features, natural skin texture, 
+    realistic hair and clothing appropriate for the setting, studio quality photography, full body shot, 
+    standing pose, photorealistic rendering, commercial photography style.
+    Ultra high definition, masterpiece quality.`;
 
   try {
     const response = await openai.images.generate({
       model: "dall-e-3",
       prompt,
       n: 1,
-      size: "1024x1024",
-      quality: "standard",
+      size: "1024x1792", // Taller for full body shots
+      quality: "hd", // High quality for realistic images
     });
 
     const imageUrl = response.data?.[0]?.url;

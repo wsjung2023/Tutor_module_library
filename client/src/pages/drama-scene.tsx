@@ -20,27 +20,43 @@ interface ScenarioConfig {
 const SCENARIOS: Record<string, ScenarioConfig> = {
   restaurant: {
     background: "linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #CD853F 100%)",
-    situation: "You're at a restaurant and need to order food",
-    userRole: "Customer",
-    characterRole: "Waitress", 
-    objective: "Successfully order a meal with good pronunciation",
-    expressions: ["May I take your order?", "What would you recommend?", "I'd like to order...", "Could I have the bill, please?"]
+    situation: "You're dining at an upscale restaurant",
+    userRole: "Customer", 
+    characterRole: "Professional Server",
+    objective: "Have a natural dining experience with proper etiquette",
+    expressions: ["Good evening, welcome to our restaurant", "May I recommend our chef's special?", "How would you like that cooked?", "Would you care for dessert?"]
   },
   airport: {
     background: "linear-gradient(135deg, #87CEEB 0%, #4682B4 50%, #2F4F4F 100%)",
-    situation: "You're at the airport check-in counter",
-    userRole: "Passenger",
-    characterRole: "Check-in Staff",
-    objective: "Complete check-in process with clear communication",
-    expressions: ["May I see your passport?", "Which seat would you prefer?", "Do you have any luggage to check?", "Here's your boarding pass"]
+    situation: "You're checking in for an international business class flight",
+    userRole: "Business Traveler",
+    characterRole: "Flight Attendant",
+    objective: "Complete check-in and receive premium service guidance",
+    expressions: ["Welcome aboard, may I see your boarding pass?", "Would you like champagne or orange juice?", "Our meal service begins shortly", "Please let me know if you need anything"]
   },
   coffee_shop: {
     background: "linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #654321 100%)",
-    situation: "You're ordering coffee at a café",
+    situation: "You're at a trendy local coffee shop meeting a friend",
     userRole: "Customer",
-    characterRole: "Barista",
-    objective: "Order your perfect coffee with confidence",
-    expressions: ["What can I get for you?", "Would you like that iced or hot?", "What size would you like?", "That'll be ready in a few minutes"]
+    characterRole: "Friendly Barista",
+    objective: "Order specialty coffee and engage in casual conversation",
+    expressions: ["Hey there! What can I craft for you today?", "That's our signature blend", "Would you like to try our new seasonal latte?", "Are you meeting someone special today?"]
+  },
+  business_meeting: {
+    background: "linear-gradient(135deg, #2F4F4F 0%, #708090 50%, #B0C4DE 100%)",
+    situation: "You're in a corporate meeting discussing a new project",
+    userRole: "Project Manager",
+    characterRole: "Senior Executive",
+    objective: "Present ideas professionally and negotiate terms",
+    expressions: ["Thank you for joining today's meeting", "What's your take on the market analysis?", "I'd like to propose an alternative approach", "When can we expect the deliverables?"]
+  },
+  hotel: {
+    background: "linear-gradient(135deg, #DAA520 0%, #B8860B 50%, #8B7355 100%)",
+    situation: "You're checking into a luxury hotel",
+    userRole: "Hotel Guest",
+    characterRole: "Concierge",
+    objective: "Get personalized recommendations and luxury service",
+    expressions: ["Welcome to our hotel, how was your journey?", "I'd be happy to arrange restaurant reservations", "Our spa services are highly recommended", "Is there anything special we can arrange for your stay?"]
   }
 };
 
@@ -112,8 +128,10 @@ export default function DramaScene() {
         voiceId: 'female_friendly',
         character: {
           style: character.style,
-          gender: character.gender
-        }
+          gender: character.gender,
+          role: scenarioConfig.characterRole
+        },
+        emotion: 'professional'
       });
       
       console.log('TTS Response received:', ttsResponse ? 'Success' : 'Failed');
@@ -172,19 +190,29 @@ export default function DramaScene() {
   const generateOpeningLine = (scenarioConfig: ScenarioConfig): string => {
     const openings: Record<string, string[]> = {
       restaurant: [
-        "Good evening! Welcome to our restaurant. I'm your server for tonight. Have you had a chance to look at our menu?",
-        "Hi there! Thanks for choosing our restaurant. Can I start you off with something to drink?",
-        "Welcome! I'm so glad you're here tonight. Are you ready to order or do you need a few more minutes?"
+        "Good evening! Welcome to our restaurant. I'm Sarah, and I'll be taking care of you tonight. Have you dined with us before?",
+        "Hello! Thank you for choosing our restaurant this evening. May I start you with our sommelier's wine recommendation?",
+        "Welcome! I'm delighted you're here. Our chef has prepared some exceptional specials tonight - would you like to hear about them?"
       ],
       airport: [
-        "Good morning! Welcome to the check-in counter. May I please see your passport and booking confirmation?",
-        "Hello! I'll be helping you with your check-in today. Which flight are you taking?",
-        "Hi there! Let's get you checked in for your flight. Do you have any bags to check today?"
+        "Good afternoon! Welcome aboard our business class service. I'm Jennifer, your flight attendant. May I offer you a welcome drink?",
+        "Hello! Thank you for flying with us today. I see you're in 3A - one of our premium seats. How was your airport experience?",
+        "Welcome aboard! I'm here to ensure you have a comfortable flight. Would you like me to hang up your jacket?"
       ],
       coffee_shop: [
-        "Good morning! Welcome to our café. What can I get started for you today?",
-        "Hi! Thanks for coming in. Are you looking for something hot or cold today?",
-        "Hello there! I love your energy this morning. What's your usual order?"
+        "Hey there! Welcome to our little coffee haven. I'm Mike - what can I create for you today?",
+        "Good morning! Love the weather today, isn't it perfect for our outdoor seating? What sounds good to you?",
+        "Hi! First time here? You've got to try our signature cold brew - it's locally roasted and absolutely amazing!"
+      ],
+      business_meeting: [
+        "Good morning everyone. Thank you for making time for today's meeting. I'm excited to discuss our new initiative with you.",
+        "Hello team. I appreciate you all being here. Shall we begin with a quick overview of where we stand?",
+        "Welcome! Before we dive into the agenda, how did the preliminary research go on your end?"
+      ],
+      hotel: [
+        "Welcome to the Grand Plaza! I'm Alexandra, your personal concierge. How was your journey here?",
+        "Good afternoon! We're so pleased to have you staying with us. Is this your first visit to our city?",
+        "Hello! Welcome to our hotel. I see you've booked our executive suite - excellent choice. May I arrange anything special for your stay?"
       ]
     };
     
@@ -314,8 +342,10 @@ export default function DramaScene() {
             voiceId: 'female_friendly',
             character: {
               style: character.style,
-              gender: character.gender
-            }
+              gender: character.gender,
+              role: currentScenario?.characterRole
+            },
+            emotion: contextualResponse.emotion || 'professional'
           });
           
           const characterResponse: DialogueTurn = {
@@ -334,13 +364,16 @@ export default function DramaScene() {
             playAudioWithFallback(contextualResponse.text, ttsResponse?.audioUrl);
           }, 500);
           
-          // Show feedback
+          // Show feedback with better expression suggestions
           if (contextualResponse.feedback) {
-            const { accuracy, pronunciation } = contextualResponse.feedback;
+            const { accuracy, pronunciation, betterExpression } = contextualResponse.feedback;
+            
             toast({
-              title: `🎭 Acting Score: ${accuracy}%`,
-              description: pronunciation === 'excellent' ? "Perfect delivery!" : 
-                          pronunciation === 'good' ? "Great job!" : "Keep practicing your pronunciation!",
+              title: `🎭 표현력 점수: ${accuracy}%`,
+              description: betterExpression ? 
+                `더 자연스러운 표현: "${betterExpression}"` :
+                pronunciation === 'excellent' ? "완벽한 발음이에요!" : 
+                pronunciation === 'good' ? "훌륭해요!" : "발음 연습을 더 해보세요!",
             });
           }
           
@@ -365,22 +398,25 @@ export default function DramaScene() {
 
   const generateContextualResponse = async (userInput: string) => {
     try {
-      const prompt = `You are ${character.name}, a ${character.style} ${currentScenario?.characterRole} in a ${currentScenario?.situation} scenario.
+      const prompt = `당신은 ${character.name}이고, ${currentScenario?.situation} 상황에서 ${currentScenario?.characterRole} 역할을 맡고 있습니다.
 
-The user (${currentScenario?.userRole}) just said: "${userInput}"
+사용자(${currentScenario?.userRole})가 방금 이렇게 말했습니다: "${userInput}"
 
-Scenario context: ${currentScenario?.situation}
-Common expressions: ${currentScenario?.expressions.join(', ')}
+시나리오 맥락: ${currentScenario?.situation}
+자주 사용하는 표현들: ${currentScenario?.expressions.join(', ')}
 
-Respond naturally as the ${currentScenario?.characterRole} would, advancing the scenario. Also provide pronunciation feedback.
+${currentScenario?.characterRole}로서 자연스럽게 응답하고 대화를 발전시켜주세요. 사용자의 발음과 표현에 대한 피드백도 제공해주세요.
 
-Respond in JSON format:
+더 자연스럽고 상황에 맞는 표현이 있다면 제안해주세요. 
+
+JSON 형식으로 응답해주세요:
 {
-  "text": "Your natural response as the character",
+  "text": "캐릭터로서의 자연스러운 응답 (영어로)",
   "feedback": {
     "accuracy": 85,
-    "pronunciation": "good",
-    "suggestions": ["Helpful pronunciation tips"]
+    "pronunciation": "good", 
+    "suggestions": ["더 나은 표현 제안"],
+    "betterExpression": "더 자연스러운 대안 표현"
   },
   "emotion": "professional"
 }`;
@@ -563,7 +599,7 @@ Respond in JSON format:
                 <img 
                   src={character.imageUrl} 
                   alt={character.name}
-                  className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-lg"
+                  className="w-32 h-48 rounded-lg object-cover border-4 border-white shadow-lg"
                 />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
@@ -600,9 +636,17 @@ Respond in JSON format:
               
               {turn.speaker === 'character' && (
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{character.name[0]}</span>
-                  </div>
+                  {character.imageUrl ? (
+                    <img 
+                      src={character.imageUrl} 
+                      alt={character.name}
+                      className="w-12 h-16 rounded-lg object-cover border-2 border-purple-500 shadow-md"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">{character.name[0]}</span>
+                    </div>
+                  )}
                   <div className="flex-1">
                     <Card className="bg-white bg-opacity-90">
                       <CardContent className="p-4">
