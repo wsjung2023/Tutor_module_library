@@ -70,30 +70,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      console.log("Direct login attempt for:", email);
-      
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
-        console.log("User not found:", email);
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      if (user.password !== password) {
-        console.log("Password mismatch for:", email);
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Set simple session
-      (req.session as any).userId = user.id;
-      console.log("Login successful for user:", user.email);
-      res.json(user);
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Authentication error" });
-    }
+  app.post("/api/login", passport.authenticate("local"), (req, res) => {
+    res.status(200).json(req.user);
   });
 
   app.post("/api/logout", (req, res) => {

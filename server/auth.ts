@@ -71,13 +71,13 @@ export function setupAuth(app: Express) {
           console.log("Stored password:", user.password);
           console.log("Provided password:", password);
           
-          // For now, use simple password comparison for testing
-          if (user.password === password) {
-            console.log("Password match - login successful");
-            return done(null, user);
-          } else {
+          // Use proper password comparison
+          if (!user.password || !(await comparePasswords(password, user.password))) {
             console.log("Password mismatch - login failed");
             return done(null, false);
+          } else {
+            console.log("Password match - login successful");
+            return done(null, user);
           }
         } catch (error) {
           console.error("LocalStrategy error:", error);
