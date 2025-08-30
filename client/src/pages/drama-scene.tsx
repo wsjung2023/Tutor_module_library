@@ -639,7 +639,7 @@ Respond in JSON format:
                 <img 
                   src={character.imageUrl} 
                   alt={character.name}
-                  className="w-48 h-64 rounded-lg object-cover object-top border-4 border-white shadow-lg"
+                  className="w-64 h-80 rounded-lg object-cover object-top border-4 border-white shadow-lg"
                 />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
               </div>

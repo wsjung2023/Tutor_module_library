@@ -115,7 +115,7 @@ export default function Character() {
           <div className="grid md:grid-cols-2 gap-8">
             {/* Character Preview */}
             <div className="text-center">
-              <div className="w-48 h-48 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center character-image overflow-hidden">
+              <div className="w-64 h-80 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center character-image overflow-hidden">
                 {character.imageUrl ? (
                   <img 
                     src={character.imageUrl} 
