@@ -86,19 +86,19 @@ export default function Character() {
   };
 
   const handleNext = () => {
-    if (!character.name || !character.gender || !character.style) {
+    if (!character.imageUrl) {
       toast({
-        title: "Incomplete Information",
-        description: "Please fill in all character details to continue.",
+        title: "Character Image Required",
+        description: "Please generate your AI tutor image first.",
         variant: "destructive",
       });
       return;
     }
-    setCurrentPage('scenario');
+    setCurrentPage('playground');
   };
 
   const handleBack = () => {
-    setCurrentPage('home');
+    setCurrentPage('scenario');
   };
 
   return (
@@ -213,7 +213,7 @@ export default function Character() {
                   onClick={handleNext}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
-                  Next: Choose Scenario
+                  Start Scene
                 </Button>
               </div>
             </div>

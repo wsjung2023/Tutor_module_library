@@ -90,6 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const emotion = validatedData.emotion || 'neutral';
         const audioUrl = await generateOpenAITTS(validatedData.text, voice, emotion as any);
+        console.log('Sending TTS response with audioUrl:', audioUrl ? 'Present' : 'Missing');
         res.json({ audioUrl });
         return;
       } catch (openaiError) {

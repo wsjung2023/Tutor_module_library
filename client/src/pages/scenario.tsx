@@ -50,11 +50,11 @@ export default function Scenario() {
       });
       return;
     }
-    setCurrentPage('playground');
+    setCurrentPage('character');
   };
 
   const handleBack = () => {
-    setCurrentPage('character');
+    setCurrentPage('audience');
   };
 
   return (

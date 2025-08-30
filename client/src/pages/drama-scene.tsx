@@ -163,6 +163,8 @@ export default function DramaScene() {
       });
       
       console.log('TTS Response received:', ttsResponse ? 'Success' : 'Failed');
+      console.log('TTS full response:', ttsResponse);
+      console.log('TTS audioUrl:', ttsResponse?.audioUrl ? 'Available' : 'Missing');
       
       const openingTurn: DialogueTurn = {
         speaker: 'character',
@@ -749,7 +751,7 @@ Respond in JSON format:
             </div>
           )}
 
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-3">
             {!isListening && !isProcessing && (
               <>
                 <Button
@@ -774,6 +776,23 @@ Respond in JSON format:
                 >
                   <Mic className="w-4 h-4 mr-2" />
                   {autoListenMode ? "Stop Auto" : "Auto Listen"}
+                </Button>
+
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    const script = currentScenario?.expressions || [];
+                    if (script.length > 0) {
+                      toast({
+                        title: "📝 Model Script",
+                        description: script.join(" → "),
+                      });
+                    }
+                  }}
+                  variant="secondary"
+                  className="rounded-full px-6 py-4"
+                >
+                  📝 Script
                 </Button>
               </>
             )}
