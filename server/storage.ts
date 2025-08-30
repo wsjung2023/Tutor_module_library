@@ -22,14 +22,7 @@ export interface IStorage {
   getUserSessions(userId: string): Promise<LearningSession[]>;
   
   // Subscription methods
-  updateUserSubscription(userId: string, subscriptionData: {
-    subscriptionTier: string;
-    subscriptionStatus: string;
-    paymentProvider: string;
-    customerId: string;
-    subscriptionId: string;
-    subscriptionExpiresAt?: Date;
-  }): Promise<User | undefined>;
+  updateUserSubscription(userId: string, subscriptionData: Partial<User>): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -79,14 +72,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Subscription operations
-  async updateUserSubscription(userId: string, subscriptionData: {
-    subscriptionTier: string;
-    subscriptionStatus: string;
-    paymentProvider: string;
-    customerId: string;
-    subscriptionId: string;
-    subscriptionExpiresAt?: Date;
-  }): Promise<User | undefined> {
+  async updateUserSubscription(userId: string, subscriptionData: Partial<User>): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({
