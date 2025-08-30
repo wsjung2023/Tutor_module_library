@@ -1,3 +1,4 @@
+import React from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -15,7 +16,6 @@ import ErrorModal from "@/components/error-modal";
 import Auth from "@/pages/Auth";
 import UserHome from "@/pages/Home";
 import Subscription from "@/pages/Subscription";
-import Home from "@/pages/Home";
 import Character from "@/pages/character";
 import Scenario from "@/pages/scenario";
 import Playground from "@/pages/playground";
@@ -51,7 +51,7 @@ function Router() {
   // Original app routing for authenticated users
   switch (currentPage) {
     case 'home':
-      return <Home />;
+      return <UserHome />;
     case 'character':
       return <Character />;
     case 'scenario':
@@ -59,7 +59,7 @@ function Router() {
     case 'playground':
       return <Playground />;
     default:
-      return <Home />;
+      return <UserHome />;
   }
 }
 
