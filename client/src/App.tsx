@@ -22,6 +22,7 @@ import Character from "@/pages/character";
 import Scenario from "@/pages/scenario";
 import Playground from "@/pages/playground";
 import NotFound from "@/pages/not-found";
+import AudienceSelection from "@/pages/AudienceSelection";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -56,7 +57,7 @@ function Router() {
   // Original app routing for authenticated users
   switch (currentPage) {
     case 'home':
-      return <UserHome />;
+      return <AudienceSelection />; // 학습 시작 시 대상 선택부터
     case 'admin':
       return <Admin />;
     case 'character':

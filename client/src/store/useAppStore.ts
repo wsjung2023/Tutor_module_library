@@ -18,7 +18,7 @@ export interface Scenario {
 }
 
 export interface AppState {
-  // Navigation
+  // Navigation  
   currentPage: 'landing' | 'auth' | 'home' | 'character' | 'scenario' | 'playground' | 'user-home' | 'subscription' | 'admin';
   
   // Learning State
