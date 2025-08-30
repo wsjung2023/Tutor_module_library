@@ -7,7 +7,7 @@ import { UsageLimitWarning } from "@/components/UsageLimitWarning";
 
 export default function Home() {
   const { user } = useAuth();
-  const { setCurrentPage } = useAppStore();
+  const { setCurrentPage, resetState } = useAppStore();
 
   const getSubscriptionBadge = () => {
     const tier = (user as any)?.subscriptionTier || 'free';
@@ -57,7 +57,9 @@ export default function Home() {
             className="hover:shadow-lg transition-shadow cursor-pointer" 
             data-testid="card-quick-start"
             onClick={() => {
-              setCurrentPage('character'); // 바로 캐릭터 선택으로 이동
+              // 빠른시작: 학습 상태 초기화 후 대상선택부터 시작 
+              resetState();
+              setCurrentPage('home'); // App.tsx에서 'home' = AudienceSelection 렌더링
             }}
           >
             <CardHeader>
