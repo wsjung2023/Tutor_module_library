@@ -14,12 +14,12 @@ function getTierPrice(tier: string): number {
   }
 }
 
-// Paddle Price ID mapping - 실제 Paddle 대시보드에서 생성한 Price ID로 교체하세요
+// Paddle Price ID mapping - FluentDrama 실제 Price ID
 function getPaddlePriceId(tier: string): string {
   switch (tier) {
-    case 'starter': return 'pri_starter_4900_krw'; // 실제 생성된 Price ID로 교체 필요
-    case 'pro': return 'pri_pro_9900_krw'; // 실제 생성된 Price ID로 교체 필요
-    case 'premium': return 'pri_premium_19900_krw'; // 실제 생성된 Price ID로 교체 필요
+    case 'starter': return 'pri_01k3xqqv4bp4xdjxn2b0p0f0n4'; // Starter Plan
+    case 'pro': return 'pri_01k3xqt841ry893jwdbjybyp2q'; // Pro Plan
+    case 'premium': return 'pri_01k3xqw6mges1rt7kmkv57xpb0'; // Premium Plan
     default: throw new Error(`Invalid tier: ${tier}`);
   }
 }
