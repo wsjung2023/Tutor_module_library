@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/store/useAppStore";
+import { UsageLimitWarning } from "@/components/UsageLimitWarning";
 
 export default function Home() {
   const { user } = useAuth();
@@ -44,6 +45,9 @@ export default function Home() {
             </Button>
           </div>
         </div>
+
+        {/* Usage Limit Warning */}
+        <UsageLimitWarning />
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

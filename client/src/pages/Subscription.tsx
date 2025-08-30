@@ -198,7 +198,7 @@ export default function Subscription() {
         </Card>
 
         {/* Pricing Plans */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className={`${((user as any)?.subscriptionTier || 'free') === 'free' ? 'border-blue-500 shadow-lg' : ''}`}>
             <CardHeader>
               <div className="flex justify-between items-start">
@@ -211,11 +211,10 @@ export default function Subscription() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm mb-6">
-                <li>✅ 일일 3회 대화 세션</li>
-                <li>✅ 기본 시나리오 제공</li>
-                <li>✅ 발음 피드백</li>
-                <li>❌ 캐릭터 1개 제한</li>
-                <li>❌ 대화 히스토리 7일간 보관</li>
+                <li>✅ 월 30회 대화</li>
+                <li>✅ 이미지 생성 1장</li>
+                <li>✅ 기본 TTS 음성</li>
+                <li>✅ 워터마크 포함</li>
               </ul>
               {((user as any)?.subscriptionTier || 'free') !== 'free' && (
                 <Button 
@@ -231,30 +230,29 @@ export default function Subscription() {
             </CardContent>
           </Card>
 
-          <Card className={`${((user as any)?.subscriptionTier || 'free') === 'premium' ? 'border-blue-500 shadow-lg' : 'border-blue-300'}`}>
+          <Card className={`${((user as any)?.subscriptionTier || 'free') === 'starter' ? 'border-blue-500 shadow-lg' : 'border-blue-300'}`}>
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle>프리미엄 플랜</CardTitle>
-                  <CardDescription className="text-2xl font-bold text-blue-600 mt-2">₩9,900/월</CardDescription>
+                  <CardTitle>스타터 플랜</CardTitle>
+                  <CardDescription className="text-2xl font-bold text-blue-600 mt-2">₩4,900/월</CardDescription>
                 </div>
-                {((user as any)?.subscriptionTier || 'free') === 'premium' && getCurrentBadge()}
+                {((user as any)?.subscriptionTier || 'free') === 'starter' && getCurrentBadge()}
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm mb-6">
-                <li>✅ 무제한 대화 세션</li>
-                <li>✅ 모든 시나리오 이용</li>
-                <li>✅ 캐릭터 무제한 생성</li>
-                <li>✅ 상세 학습 리포트</li>
-                <li>✅ 대화 히스토리 영구 보관</li>
+                <li>✅ 월 300회 대화</li>
+                <li>✅ 이미지 생성 15장</li>
+                <li>✅ 프리미엄 TTS 음성 5종</li>
+                <li>✅ 대화 저장/내보내기</li>
               </ul>
-              {((user as any)?.subscriptionTier || 'free') !== 'premium' && (
+              {((user as any)?.subscriptionTier || 'free') !== 'starter' && (
                 <Button 
                   className="w-full"
-                  onClick={() => handleSubscribe('premium')}
+                  onClick={() => handleSubscribe('starter')}
                   disabled={subscribeMutation.isPending}
-                  data-testid="button-subscribe-premium"
+                  data-testid="button-subscribe-starter"
                 >
                   {subscribeMutation.isPending ? "처리 중..." : "프리미엄 시작"}
                 </Button>
@@ -267,18 +265,18 @@ export default function Subscription() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle>프로 플랜</CardTitle>
-                  <CardDescription className="text-2xl font-bold text-purple-600 mt-2">₩19,900/월</CardDescription>
+                  <CardDescription className="text-2xl font-bold text-purple-600 mt-2">₩9,900/월</CardDescription>
                 </div>
                 {((user as any)?.subscriptionTier || 'free') === 'pro' && getCurrentBadge()}
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm mb-6">
-                <li>✅ 프리미엄 모든 기능</li>
-                <li>✅ 개인 맞춤 시나리오 생성</li>
-                <li>✅ 1:1 튜터링 세션 예약</li>
-                <li>✅ API 액세스</li>
-                <li>✅ 우선 고객 지원</li>
+                <li>✅ 월 600회 대화</li>
+                <li>✅ 이미지 생성 25장</li>
+                <li>✅ 모든 TTS 음성 10종</li>
+                <li>✅ 시나리오 커스터마이징</li>
+                <li>✅ 발음 교정 AI</li>
               </ul>
               {((user as any)?.subscriptionTier || 'free') !== 'pro' && (
                 <Button 
@@ -288,6 +286,42 @@ export default function Subscription() {
                   data-testid="button-subscribe-pro"
                 >
                   {subscribeMutation.isPending ? "처리 중..." : "프로 시작"}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className={`${((user as any)?.subscriptionTier || 'free') === 'premium' ? 'border-gradient-to-r from-purple-500 to-pink-500 shadow-2xl' : 'border-purple-300'}`}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full mb-2">
+                    최고급
+                  </div>
+                  <CardTitle>프리미엄 플랜</CardTitle>
+                  <CardDescription className="text-3xl font-bold text-purple-600 mt-2">₩19,900/월</CardDescription>
+                </div>
+                {((user as any)?.subscriptionTier || 'free') === 'premium' && getCurrentBadge()}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm mb-6">
+                <li>✅ 월 1,200회 대화</li>
+                <li>✅ 이미지 생성 60장</li>
+                <li>✅ HD 이미지 생성 무제한</li>
+                <li>✅ 실시간 음성 대화</li>
+                <li>✅ 개인 맞춤 학습 분석</li>
+                <li>✅ API 접근 권한</li>
+                <li>✅ 우선 고객지원</li>
+              </ul>
+              {((user as any)?.subscriptionTier || 'free') !== 'premium' && (
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  onClick={() => handleSubscribe('premium')}
+                  disabled={subscribeMutation.isPending}
+                  data-testid="button-subscribe-premium"
+                >
+                  {subscribeMutation.isPending ? "처리 중..." : "프리미엄 시작"}
                 </Button>
               )}
             </CardContent>

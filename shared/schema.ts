@@ -22,14 +22,15 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   // Subscription fields
-  subscriptionTier: varchar("subscription_tier").default("free"), // free, premium, pro
+  subscriptionTier: varchar("subscription_tier").default("free"), // free, starter, pro, premium
   subscriptionStatus: varchar("subscription_status").default("active"), // active, canceled, expired
   paymentProvider: varchar("payment_provider"), // portone, toss, paddle
   customerId: varchar("customer_id"),
   subscriptionId: varchar("subscription_id"),
   subscriptionExpiresAt: timestamp("subscription_expires_at"),
   // Usage tracking
-  dailyUsageCount: varchar("daily_usage_count").default("0"),
+  dailyUsageCount: varchar("daily_usage_count").default("0"), // Monthly usage for free tier
+  monthlyImageCount: varchar("monthly_image_count").default("0"), // Track image generation
   lastUsageReset: timestamp("last_usage_reset").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
