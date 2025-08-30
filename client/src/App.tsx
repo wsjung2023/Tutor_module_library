@@ -17,6 +17,7 @@ import Auth from "@/pages/Auth";
 import Landing from "@/pages/Landing";
 import UserHome from "@/pages/Home";
 import Subscription from "@/pages/Subscription";
+import Admin from "@/pages/Admin";
 import Character from "@/pages/character";
 import Scenario from "@/pages/scenario";
 import Playground from "@/pages/playground";
@@ -56,6 +57,8 @@ function Router() {
   switch (currentPage) {
     case 'home':
       return <UserHome />;
+    case 'admin':
+      return <Admin />;
     case 'character':
       return <Character />;
     case 'scenario':

@@ -77,6 +77,18 @@ export default function NavigationHeader() {
               {user?.subscriptionTier === 'pro' && <Badge className="bg-purple-500 text-xs">프로</Badge>}
             </button>
 
+            <button 
+              onClick={() => setCurrentPage('admin')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('admin') 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="nav-admin"
+            >
+              <i className="fas fa-cog mr-1"></i> 관리자
+            </button>
+
             <Button 
               onClick={() => setCurrentPage('playground')}
               disabled={!character.name}

@@ -25,6 +25,10 @@ export interface IStorage {
   
   // Subscription methods
   updateUserSubscription(userId: string, subscriptionData: Partial<User>): Promise<User | undefined>;
+  
+  // Admin methods
+  getAllUsers(): Promise<User[]>;
+  resetUserUsage(userId: string): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -94,6 +98,26 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    const allUsers = await db.select().from(users).orderBy(users.createdAt);
+    return allUsers;
+  }
+
+  async resetUserUsage(userId: string): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        dailyUsageCount: '0',
+        monthlyImageCount: '0',
+        lastUsageReset: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser;
   }
 }
 

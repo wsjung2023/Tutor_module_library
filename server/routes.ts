@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { isAuthenticated } from "./auth";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -295,6 +296,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Cancel subscription error:", error);
       res.status(500).json({ message: "Failed to cancel subscription" });
+    }
+  });
+
+  // Admin endpoints
+  app.get("/api/admin/users", isAuthenticated, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Get users error:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/admin/user/:email", isAuthenticated, async (req, res) => {
+    try {
+      const { email } = req.params;
+      const user = await storage.getUserByEmail(decodeURIComponent(email));
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Get user error:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.put("/api/admin/user/:id/subscription", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { tier } = req.body;
+      
+      const user = await storage.updateUserSubscription(id, {
+        subscriptionTier: tier,
+        subscriptionStatus: tier === 'free' ? 'inactive' : 'active',
+        paymentProvider: tier === 'free' ? null : 'admin',
+        customerId: tier === 'free' ? null : `admin_${id}`,
+        subscriptionId: tier === 'free' ? null : `admin_sub_${Date.now()}`,
+        subscriptionExpiresAt: tier === 'free' ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      });
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Update subscription error:", error);
+      res.status(500).json({ message: "Failed to update subscription" });
+    }
+  });
+
+  app.put("/api/admin/user/:id/reset-usage", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const user = await storage.resetUserUsage(id);
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Reset usage error:", error);
+      res.status(500).json({ message: "Failed to reset usage" });
     }
   });
 
