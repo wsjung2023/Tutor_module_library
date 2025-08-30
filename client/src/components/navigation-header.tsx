@@ -50,7 +50,10 @@ export default function NavigationHeader() {
             </button>
             
             <button 
-              onClick={() => handleMenuClick('home')}
+              onClick={() => {
+                resetState(); // 학습 상태 초기화
+                handleMenuClick('home');
+              }}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive('home') 
                   ? 'text-blue-600 bg-blue-50' 
@@ -159,7 +162,10 @@ export default function NavigationHeader() {
               </button>
               
               <button 
-                onClick={() => handleMenuClick('home')}
+                onClick={() => {
+                  resetState(); // 학습 상태 초기화
+                  handleMenuClick('home');
+                }}
                 className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive('home') 
                     ? 'text-blue-600 bg-blue-50' 
