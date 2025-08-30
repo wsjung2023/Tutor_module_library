@@ -14,7 +14,7 @@ export default function Subscription() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setCurrentPage } = useAppStore();
-  const [selectedProvider, setSelectedProvider] = useState<'portone' | 'toss' | 'paddle'>('portone');
+  const [selectedProvider, setSelectedProvider] = useState<'paddle'>('paddle');
 
   const subscribeMutation = useMutation({
     mutationFn: async ({ tier, provider }: { tier: string; provider: string }) => {
@@ -162,36 +162,24 @@ export default function Subscription() {
           </Card>
         )}
 
-        {/* Payment Method Selection */}
+        {/* Payment Method Selection - Only Paddle Available */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>결제 방법 선택</CardTitle>
+            <CardTitle>결제 방법</CardTitle>
             <CardDescription>
-              한국 사용자를 위한 다양한 결제 옵션을 제공합니다
+              안전하고 신뢰할 수 있는 글로벌 결제 시스템을 사용합니다
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="flex justify-center">
               <Button
-                variant={selectedProvider === 'portone' ? 'default' : 'outline'}
-                onClick={() => setSelectedProvider('portone')}
-                data-testid="button-provider-portone"
-              >
-                PortOne (아임포트)
-              </Button>
-              <Button
-                variant={selectedProvider === 'toss' ? 'default' : 'outline'}
-                onClick={() => setSelectedProvider('toss')}
-                data-testid="button-provider-toss"
-              >
-                Toss Payments
-              </Button>
-              <Button
-                variant={selectedProvider === 'paddle' ? 'default' : 'outline'}
-                onClick={() => setSelectedProvider('paddle')}
+                variant="default"
+                disabled
+                className="bg-blue-600 text-white"
                 data-testid="button-provider-paddle"
               >
-                Paddle (글로벌)
+                <i className="fas fa-credit-card mr-2"></i>
+                Paddle 결제 시스템
               </Button>
             </div>
           </CardContent>

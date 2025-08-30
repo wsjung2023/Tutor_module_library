@@ -152,9 +152,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           const paddleData = await paddlePayment.json();
-          console.log('Paddle API key format:', process.env.PADDLE_API_KEY?.substring(0, 20) + '...');
-          console.log('Paddle API response status:', paddlePayment.status);
-          console.log('Paddle API response:', paddleData);
           
           if (paddlePayment.ok) {
             const user = await storage.updateUserSubscription(userId, {
