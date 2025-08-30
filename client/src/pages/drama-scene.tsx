@@ -151,7 +151,7 @@ export default function DramaScene() {
       const voiceId = getVoiceForCharacter(character.gender, scenarioConfig.characterRole);
       console.log(`Using voice: ${voiceId} for ${character.gender} ${scenarioConfig.characterRole}`);
       
-      const ttsResponse: any = await apiRequest('POST', '/api/tts', {
+      const ttsResponseRaw = await apiRequest('POST', '/api/tts', {
         text: openingLine,
         voiceId: voiceId,
         character: {
@@ -161,6 +161,8 @@ export default function DramaScene() {
         },
         emotion: 'friendly'
       });
+      
+      const ttsResponse = await ttsResponseRaw.json();
       
       console.log('TTS Response received:', ttsResponse ? 'Success' : 'Failed');
       console.log('TTS full response:', ttsResponse);
@@ -185,7 +187,13 @@ export default function DramaScene() {
       
       // Auto-play opening line with fallback
       setTimeout(() => {
-        playAudioWithFallback(openingLine, ttsResponse?.audioUrl);
+        if (ttsResponse?.audioUrl) {
+          console.log('Playing TTS audio:', ttsResponse.audioUrl.substring(0, 50) + '...');
+          playAudioWithFallback(openingLine, ttsResponse.audioUrl);
+        } else {
+          console.warn('No audio URL available, playing with browser TTS fallback');
+          playAudioWithFallback(openingLine);
+        }
         toast({
           title: `🎭 ${character.name} is speaking!`,
           description: "The scene has begun. Listen and respond when ready."
@@ -391,7 +399,7 @@ export default function DramaScene() {
           
           // Generate TTS for character response with character info
           const voiceId = getVoiceForCharacter(character.gender, currentScenario?.characterRole || 'Teacher');
-          const ttsResponse: any = await apiRequest('POST', '/api/tts', {
+          const ttsResponseRaw = await apiRequest('POST', '/api/tts', {
             text: contextualResponse.text,
             voiceId: voiceId,
             character: {
@@ -401,6 +409,8 @@ export default function DramaScene() {
             },
             emotion: contextualResponse.emotion || 'friendly'
           });
+          
+          const ttsResponse = await ttsResponseRaw.json();
           
           const characterResponse: DialogueTurn = {
             speaker: 'character',
