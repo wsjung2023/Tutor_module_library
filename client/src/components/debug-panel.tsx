@@ -3,10 +3,10 @@ import { useAuth } from "@/hooks/useAuth";
 export function DebugPanel() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
-  // Always show in development mode
-  if (import.meta.env.MODE !== 'development') {
-    return null;
-  }
+  // Always show for debugging
+  // if (import.meta.env.MODE !== 'development') {
+  //   return null;
+  // }
 
   return (
     <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded text-xs max-w-sm">
