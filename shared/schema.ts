@@ -76,7 +76,7 @@ export const ttsRequestSchema = z.object({
     gender: z.string().optional(),
     role: z.string().optional(),
   }).optional(),
-  emotion: z.enum(['neutral', 'happy', 'concerned', 'professional', 'excited', 'calm']).optional(),
+  emotion: z.enum(['neutral', 'happy', 'concerned', 'professional', 'excited', 'calm', 'friendly']).optional(),
 });
 
 export const speechRecognitionRequestSchema = z.object({
