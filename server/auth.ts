@@ -197,9 +197,19 @@ export function setupAuth(app: Express) {
   });
 
   // Google OAuth routes
-  app.get("/api/google", 
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
+  app.get("/api/google", (req, res, next) => {
+    // 동적으로 callbackURL 설정
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const callbackURL = `${protocol}://${host}/api/google/callback`;
+    
+    console.log(`Google OAuth callbackURL: ${callbackURL}`);
+    
+    passport.authenticate("google", { 
+      scope: ["profile", "email"],
+      callbackURL: callbackURL
+    })(req, res, next);
+  });
 
   app.get("/api/google/callback",
     passport.authenticate("google", { failureRedirect: "/" }),
