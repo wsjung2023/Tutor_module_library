@@ -164,6 +164,22 @@ export function setupAuth(app: Express) {
     })(req, res, next);
   });
 
+  // User endpoint
+  app.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    res.json(req.user);
+  });
+
+  // Logout endpoint
+  app.post("/api/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
   // Logout endpoint
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
