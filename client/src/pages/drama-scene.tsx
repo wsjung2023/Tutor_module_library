@@ -57,6 +57,23 @@ const SCENARIOS: Record<string, ScenarioConfig> = {
     characterRole: "Concierge",
     objective: "Get personalized recommendations and luxury service",
     expressions: ["Welcome to our hotel, how was your journey?", "I'd be happy to arrange restaurant reservations", "Our spa services are highly recommended", "Is there anything special we can arrange for your stay?"]
+  },
+  // Additional scenarios for student audience
+  cafeteria: {
+    background: "linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%)",
+    situation: "You're in the school cafeteria ordering lunch",
+    userRole: "Student",
+    characterRole: "Cafeteria Staff",
+    objective: "Order lunch and practice casual conversation",
+    expressions: ["What would you like for lunch today?", "Would you like fries with that?", "Here's your meal, enjoy!", "Have a great day!"]
+  },
+  club: {
+    background: "linear-gradient(135deg, #FFB6C1 0%, #98FB98 50%, #87CEEB 100%)",
+    situation: "You're joining a school club activity",
+    userRole: "New Member",
+    characterRole: "Club Leader",
+    objective: "Introduce yourself and learn about club activities",
+    expressions: ["Welcome to our club!", "What are you interested in?", "We meet every Tuesday", "Looking forward to working with you!"]
   }
 };
 
@@ -107,12 +124,20 @@ export default function DramaScene() {
   }, [character.name, scenario.presetKey, dialogueHistory.length]);
 
   const initializeScene = () => {
-    // Get scenario config
-    const scenarioConfig = SCENARIOS[scenario.presetKey || 'restaurant'];
+    // Get scenario config with fallback
+    const scenarioKey = scenario.presetKey || 'restaurant';
+    const scenarioConfig = SCENARIOS[scenarioKey] || SCENARIOS['restaurant'];
+    
+    console.log('Available scenarios:', Object.keys(SCENARIOS));
+    console.log('Requested scenario:', scenarioKey);
+    console.log('Using scenario config:', scenarioConfig);
+    
     setCurrentScenario(scenarioConfig);
     
     // Start the scene with character introduction
-    startScenario(scenarioConfig);
+    if (scenarioConfig) {
+      startScenario(scenarioConfig);
+    }
   };
 
   const startScenario = async (scenarioConfig: ScenarioConfig) => {
@@ -398,25 +423,30 @@ export default function DramaScene() {
 
   const generateContextualResponse = async (userInput: string) => {
     try {
-      const prompt = `당신은 ${character.name}이고, ${currentScenario?.situation} 상황에서 ${currentScenario?.characterRole} 역할을 맡고 있습니다.
+      // Handle Korean custom scenarios
+      const scenarioContext = currentScenario ? 
+        `${currentScenario.situation}` : 
+        scenario.freeText || 'English conversation practice';
+      
+      const characterRole = currentScenario?.characterRole || 'English conversation partner';
+      const userRole = currentScenario?.userRole || 'English learner';
+      
+      const prompt = `You are ${character.name}, playing the role of ${characterRole} in this scenario: "${scenarioContext}"
 
-사용자(${currentScenario?.userRole})가 방금 이렇게 말했습니다: "${userInput}"
+The user (${userRole}) just said: "${userInput}"
 
-시나리오 맥락: ${currentScenario?.situation}
-자주 사용하는 표현들: ${currentScenario?.expressions.join(', ')}
+Please respond naturally as the ${characterRole} would, advancing the conversation. Also provide helpful feedback.
 
-${currentScenario?.characterRole}로서 자연스럽게 응답하고 대화를 발전시켜주세요. 사용자의 발음과 표현에 대한 피드백도 제공해주세요.
+If the user's expression could be improved, suggest a more natural or appropriate alternative.
 
-더 자연스럽고 상황에 맞는 표현이 있다면 제안해주세요. 
-
-JSON 형식으로 응답해주세요:
+Respond in JSON format:
 {
-  "text": "캐릭터로서의 자연스러운 응답 (영어로)",
+  "text": "Your natural response as the character (in English)",
   "feedback": {
     "accuracy": 85,
     "pronunciation": "good", 
-    "suggestions": ["더 나은 표현 제안"],
-    "betterExpression": "더 자연스러운 대안 표현"
+    "suggestions": ["Helpful tips for improvement"],
+    "betterExpression": "A more natural alternative expression"
   },
   "emotion": "professional"
 }`;
@@ -599,7 +629,7 @@ JSON 형식으로 응답해주세요:
                 <img 
                   src={character.imageUrl} 
                   alt={character.name}
-                  className="w-32 h-48 rounded-lg object-cover border-4 border-white shadow-lg"
+                  className="w-48 h-64 rounded-lg object-cover object-top border-4 border-white shadow-lg"
                 />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
@@ -640,7 +670,7 @@ JSON 형식으로 응답해주세요:
                     <img 
                       src={character.imageUrl} 
                       alt={character.name}
-                      className="w-12 h-16 rounded-lg object-cover border-2 border-purple-500 shadow-md"
+                      className="w-16 h-20 rounded-lg object-cover object-top border-2 border-purple-500 shadow-md"
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">

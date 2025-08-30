@@ -12,6 +12,7 @@ export default function Character() {
   const { 
     character, 
     audience, 
+    scenario,
     setCharacter, 
     setCurrentPage, 
     isLoading, 
@@ -59,6 +60,7 @@ export default function Character() {
           gender: character.gender,
           style: character.style,
           audience: audience,
+          scenario: scenario?.presetKey || 'restaurant'
         }
       );
 

@@ -100,11 +100,11 @@ export default function Scenario() {
             {/* Custom Scenario */}
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                <i className="fas fa-edit mr-2 text-purple-600"></i>Custom Scenario
+                <i className="fas fa-edit mr-2 text-purple-600"></i>커스텀 시나리오
               </h3>
               <div className="bg-gray-50 rounded-lg p-6">
                 <Label htmlFor="custom-scenario" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Describe your situation
+                  원하는 상황을 설명해주세요
                 </Label>
                 <Textarea
                   id="custom-scenario"
@@ -113,11 +113,16 @@ export default function Scenario() {
                   onCompositionStart={handleCompositionStart}
                   onCompositionEnd={handleCompositionEnd}
                   rows={6}
-                  placeholder="Describe a specific situation you'd like to practice... For example: 'I want to practice asking for directions at the airport' or 'Help me with small talk at a coffee shop'"
+                  placeholder="연습하고 싶은 상황을 한국어로 자세히 설명해주세요...
+예시: 
+- 해외 출장 중 호텔에서 룸서비스 주문하기
+- 외국인 친구와 한국 음식 소개하며 식사하기  
+- 국제 회의에서 프레젠테이션 질문 답변하기
+- 공항에서 항공편 변경 요청하기"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  Be specific about the context, people involved, and what you want to achieve
+                  상황, 등장인물, 목표를 구체적으로 작성해주세요
                 </p>
               </div>
             </div>
