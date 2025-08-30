@@ -14,6 +14,16 @@ function getTierPrice(tier: string): number {
   }
 }
 
+// Paddle Price ID mapping - 실제 Paddle 대시보드에서 생성한 Price ID로 교체하세요
+function getPaddlePriceId(tier: string): string {
+  switch (tier) {
+    case 'starter': return 'pri_starter_4900_krw'; // 실제 생성된 Price ID로 교체 필요
+    case 'pro': return 'pri_pro_9900_krw'; // 실제 생성된 Price ID로 교체 필요
+    case 'premium': return 'pri_premium_19900_krw'; // 실제 생성된 Price ID로 교체 필요
+    default: throw new Error(`Invalid tier: ${tier}`);
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
@@ -251,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
             body: JSON.stringify({
               items: [{
-                price_id: `pri_${tier}_monthly`,
+                price_id: getPaddlePriceId(tier),
                 quantity: 1
               }],
               collection_mode: 'automatic',
