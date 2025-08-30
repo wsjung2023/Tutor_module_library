@@ -546,8 +546,7 @@ Respond in JSON format:
                    name.includes('susan') ||
                    name.includes('anna') ||
                    name.includes('helen') ||
-                   name.includes('catherine') ||
-                   (voice.gender && voice.gender === 'female');
+                   name.includes('catherine');
           });
           
           // Fallback: find voice with higher pitch or female-sounding characteristics
@@ -568,8 +567,7 @@ Respond in JSON format:
                    name.includes('david') ||
                    name.includes('mark') ||
                    name.includes('paul') ||
-                   name.includes('alex') ||
-                   (voice.gender && voice.gender === 'male');
+                   name.includes('alex');
           });
         }
         
