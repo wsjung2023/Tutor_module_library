@@ -6,7 +6,7 @@ export default function AudienceSelection() {
 
   const handleAudienceSelect = (audience: 'student' | 'general' | 'business') => {
     setAudience(audience);
-    setCurrentPage('scenario'); // 대상 선택 후 시나리오로 이동
+    setCurrentPage('character'); // 대상 선택 후 캐릭터로 이동 (원래 플로우)
   };
 
   return (
