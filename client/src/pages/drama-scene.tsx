@@ -149,8 +149,10 @@ export default function DramaScene() {
 
   const startScenario = async (scenarioConfig: ScenarioConfig) => {
     console.log('Starting scenario with config:', scenarioConfig);
-    const openingLine = generateOpeningLine(scenarioConfig);
-    console.log('Generated opening line:', openingLine);
+    setIsProcessing(true);
+    const openingLine = await generateOpeningLine(scenarioConfig);
+    console.log('AI generated opening line:', openingLine);
+    setIsProcessing(false);
     
     try {
       console.log('Calling TTS API...');
@@ -232,7 +234,30 @@ export default function DramaScene() {
     }
   };
 
-  const generateOpeningLine = (scenarioConfig: ScenarioConfig): string => {
+  const generateOpeningLine = async (scenarioConfig: ScenarioConfig): Promise<string> => {
+    try {
+      // Use AI to generate dynamic opening line
+      const response = await apiRequest('POST', '/api/generate-opening', {
+        character,
+        scenario,
+        audience
+      });
+      
+      return response.openingLine || `Hi! I'm ${character.name}. Let's practice together!`;
+    } catch (error) {
+      console.error('Failed to generate dynamic opening:', error);
+      // Fallback to character-based greeting
+      const greetingStyle = character.style === 'cheerful' ? 'enthusiastic' : 
+                          character.style === 'calm' ? 'gentle' : 'professional';
+      return `Hello! I'm ${character.name}. ${greetingStyle === 'enthusiastic' ? 'I\'m so excited to practice with you today!' : 
+             greetingStyle === 'gentle' ? 'I\'m here to help you practice at your own pace.' : 
+             'Let\'s begin our practice session.'} What would you like to talk about?`;
+    }
+  };
+
+  // Remove all hardcoded opening arrays - now using AI generation
+  const generateOpeningLineOld = (scenarioConfig: ScenarioConfig): string => {
+    // Keeping old method as backup but making it more dynamic
     const openings: Record<string, string[]> = {
       restaurant: [
         `Good evening! Welcome to our restaurant. I'm ${character.name}, and I'll be taking care of you tonight. Have you dined with us before?`,

@@ -622,6 +622,50 @@ STRICTLY NO: head-and-shoulders only, waist-up shots, cropped legs, cropped feet
     }
   }
 
+  // Generate dynamic opening line for drama scenes
+  app.post('/api/generate-opening', async (req, res) => {
+    try {
+      const { character, scenario, audience } = req.body;
+      
+      // Create contextual opening based on character and scenario
+      const systemPrompt = `You are ${character.name}, a ${character.gender} with a ${character.style} personality. 
+      
+Context: ${scenario.presetKey || 'general conversation'} situation
+Audience: ${audience} level English learner
+Scenario details: ${scenario.freeText || 'General conversation practice'}
+
+Generate a completely natural opening line that:
+- Reflects your personality (${character.style})
+- Fits the situation perfectly
+- Is appropriate for ${audience} English level
+- Sounds spontaneous, not scripted
+- Creates immediate engagement
+- Is 1-2 sentences maximum
+
+Be authentic and contextual. Avoid generic greetings.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Create a natural opening line for this exact moment in the ${scenario.presetKey || 'conversation'} scenario.` }
+        ],
+        max_tokens: 100,
+        temperature: 0.9
+      });
+
+      const openingLine = response.choices[0].message.content?.trim() || "Hello! How are you today?";
+      
+      res.json({ openingLine });
+      
+    } catch (error) {
+      console.error('Opening generation error:', error);
+      // Fallback to simple but still dynamic response
+      const fallbackOpening = `Hi there! I'm ${character.name}. ${character.style === 'cheerful' ? 'Great to meet you!' : character.style === 'calm' ? 'Nice to see you.' : 'Let\'s get started.'} How can I help you practice today?`;
+      res.json({ openingLine: fallbackOpening });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

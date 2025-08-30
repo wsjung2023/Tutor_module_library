@@ -42,7 +42,27 @@ export default function VoiceChat() {
   }, [character.name]);
 
   const initializeChat = async () => {
-    const greetingText = `Hello! I'm ${character.name}, your English conversation partner. I'm here to help you practice speaking English naturally. Let's have a friendly chat - just speak naturally and I'll respond! How are you doing today?`;
+    let greetingText: string;
+    
+    try {
+      // Generate dynamic greeting based on character and scenario
+      const response = await apiRequest('POST', '/api/generate-opening', {
+        character,
+        scenario: { presetKey: 'conversation', freeText: 'friendly chat practice' },
+        audience: 'general'
+      });
+      
+      greetingText = response.openingLine || `Hello! I'm ${character.name}, ready to chat with you naturally!`;
+    } catch (error) {
+      // Dynamic fallback based on character personality
+      const personalityGreeting = character.style === 'cheerful' ? 
+        `Hi there! I'm ${character.name} and I'm super excited to practice English with you today! What's on your mind?` :
+        character.style === 'calm' ? 
+        `Hello, I'm ${character.name}. I'm here to have a relaxed conversation with you. How has your day been?` :
+        `Good day. I'm ${character.name}, and I'm here to help you practice professional English conversation. Shall we begin?`;
+      
+      greetingText = personalityGreeting;
+    }
     
     try {
       // Generate TTS for greeting
