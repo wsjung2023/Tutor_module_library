@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PortOne payment integration
+  // Paddle payment integration only
   app.post('/api/subscribe', async (req: any, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -122,134 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { tier, provider } = req.body;
       const userId = req.user.id;
       
-      // Real PortOne payment integration
-      if (provider === 'portone') {
-        const paymentAmounts: Record<string, number> = {
-          starter: 4900,
-          pro: 9900,
-          premium: 19900
-        };
-        
-        const paymentAmount = paymentAmounts[tier];
-        
-        if (!paymentAmount) {
-          return res.status(400).json({ message: "Invalid tier" });
-        }
-        
-        try {
-          // Check if PORTONE_ACCESS_TOKEN is available
-          if (!process.env.PORTONE_ACCESS_TOKEN) {
-            return res.status(400).json({ 
-              message: "PortOne API 키가 설정되지 않았습니다. 관리자에게 문의해주세요." 
-            });
-          }
-
-          // Create PortOne payment request using correct V2 endpoint
-          const portonePayment = await fetch('https://api.portone.io/api/initiatepayment', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${process.env.PORTONE_ACCESS_TOKEN}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              channelKey: process.env.PORTONE_CHANNEL_KEY || 'channel-key-default',
-              paymentId: `subscription_${userId}_${Date.now()}`,
-              orderName: `AI English Tutor ${tier} 플랜`,
-              amount: {
-                total: paymentAmount
-              },
-              currency: 'KRW',
-              customer: {
-                name: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email,
-                email: req.user.email
-              },
-              noticeUrls: [`${process.env.BASE_URL || 'http://localhost:5000'}/api/portone/webhook`]
-            })
-          });
-          
-          // Check if response is JSON and log response
-          const contentType = portonePayment.headers.get('content-type');
-          console.log('PortOne response status:', portonePayment.status);
-          console.log('PortOne response headers:', Object.fromEntries(portonePayment.headers.entries()));
-          
-          if (contentType && contentType.includes('application/json')) {
-            const paymentData = await portonePayment.json();
-            console.log('PortOne API response:', paymentData);
-            
-            if (portonePayment.ok && (paymentData.success || paymentData.status === 'ready')) {
-              const user = await storage.updateUserSubscription(userId, {
-                subscriptionTier: tier,
-                paymentProvider: provider,
-                subscriptionStatus: 'active',
-                customerId: paymentData.customerId || userId,
-                subscriptionId: paymentData.paymentId || `portone_${Date.now()}`,
-                subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-              });
-              
-              res.json({ success: true, user, paymentData });
-            } else {
-              res.status(400).json({ message: "PortOne 결제 실패", error: paymentData });
-            }
-          } else {
-            // Non-JSON response - likely API error
-            const errorText = await portonePayment.text();
-            console.error("PortOne API error:", errorText);
-            res.status(400).json({ 
-              message: "PortOne API 오류가 발생했습니다. API 키 또는 설정을 확인해주세요." 
-            });
-          }
-        } catch (portoneError) {
-          console.error("PortOne request error:", portoneError);
-          res.status(500).json({ 
-            message: "PortOne 결제 처리 중 오류가 발생했습니다." 
-          });
-        }
-      } else if (provider === 'toss') {
-        try {
-          if (!process.env.TOSS_SECRET_KEY) {
-            return res.status(400).json({ 
-              message: "Toss Payments API 키가 설정되지 않았습니다." 
-            });
-          }
-
-          // Toss Payments 실제 API 호출
-          const tossPayment = await fetch('https://api.tosspayments.com/v1/payments', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Basic ${Buffer.from(process.env.TOSS_SECRET_KEY + ':').toString('base64')}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              amount: getTierPrice(tier),
-              orderId: `order_${userId}_${Date.now()}`,
-              orderName: `AI English Tutor ${tier} 플랜`,
-              customerEmail: req.user.email,
-              customerName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim()
-            })
-          });
-
-          const tossData = await tossPayment.json();
-          
-          if (tossPayment.ok) {
-            const user = await storage.updateUserSubscription(userId, {
-              subscriptionTier: tier,
-              paymentProvider: provider,
-              subscriptionStatus: 'active',
-              customerId: tossData.customerId || userId,
-              subscriptionId: tossData.paymentKey || `toss_${Date.now()}`,
-              subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-            });
-            
-            res.json({ success: true, user, paymentData: tossData });
-          } else {
-            res.status(400).json({ message: "Toss 결제 실패", error: tossData });
-          }
-        } catch (tossError) {
-          console.error("Toss request error:", tossError);
-          res.status(500).json({ message: "Toss 결제 처리 중 오류가 발생했습니다." });
-        }
-
-      } else if (provider === 'paddle') {
+      if (provider === 'paddle') {
         try {
           if (!process.env.PADDLE_API_KEY) {
             return res.status(400).json({ 
@@ -279,6 +152,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           const paddleData = await paddlePayment.json();
+          console.log('Paddle API key format:', process.env.PADDLE_API_KEY?.substring(0, 20) + '...');
+          console.log('Paddle API response status:', paddlePayment.status);
           console.log('Paddle API response:', paddleData);
           
           if (paddlePayment.ok) {
@@ -301,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
       } else {
-        res.status(400).json({ message: "지원하지 않는 결제 제공업체입니다." });
+        res.status(400).json({ message: "현재 Paddle 결제만 지원합니다." });
       }
       
     } catch (error) {
