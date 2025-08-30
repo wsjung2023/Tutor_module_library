@@ -7,7 +7,7 @@ export default function Home() {
 
   const handleAudienceSelect = (audience: 'student' | 'general' | 'business') => {
     setAudience(audience);
-    setCurrentPage('character');
+    setCurrentPage('scenario');
   };
 
   return (
