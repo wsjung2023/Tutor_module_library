@@ -3,14 +3,38 @@ import { pgTable, text, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  }
+);
+
+// User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  // Subscription fields
+  subscriptionTier: varchar("subscription_tier").default("free"), // free, premium, pro
+  subscriptionStatus: varchar("subscription_status").default("active"), // active, canceled, expired
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  subscriptionExpiresAt: timestamp("subscription_expires_at"),
+  // Usage tracking
+  dailyUsageCount: varchar("daily_usage_count").default("0"),
+  lastUsageReset: timestamp("last_usage_reset").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const sessions = pgTable("sessions", {
+// Learning sessions table
+export const learningSessions = pgTable("learning_sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id),
   audience: text("audience").notNull(), // 'student', 'general', 'business'
@@ -30,15 +54,19 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
-export const insertSessionSchema = createInsertSchema(sessions).omit({
+export const insertSessionSchema = createInsertSchema(learningSessions).omit({
   id: true,
   createdAt: true,
 });
+
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
 
 export const characterSchema = z.object({
   name: z.string().min(1, "Character name is required"),
@@ -105,9 +133,8 @@ export const conversationStateSchema = z.object({
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
 export type InsertSession = z.infer<typeof insertSessionSchema>;
-export type Session = typeof sessions.$inferSelect;
+export type LearningSession = typeof learningSessions.$inferSelect;
 export type Character = z.infer<typeof characterSchema>;
 export type Scenario = z.infer<typeof scenarioSchema>;
 export type GenerateImageRequest = z.infer<typeof generateImageRequestSchema>;
