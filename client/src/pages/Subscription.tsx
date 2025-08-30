@@ -242,7 +242,7 @@ export default function Subscription() {
                   disabled={subscribeMutation.isPending}
                   data-testid="button-subscribe-starter"
                 >
-                  {subscribeMutation.isPending ? "처리 중..." : "프리미엄 시작"}
+                  {subscribeMutation.isPending ? "처리 중..." : "스타터 시작"}
                 </Button>
               )}
             </CardContent>
