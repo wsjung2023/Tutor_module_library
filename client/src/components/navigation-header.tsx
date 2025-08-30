@@ -92,6 +92,18 @@ export default function NavigationHeader() {
               {(user as any)?.subscriptionTier === 'premium' && <Badge className="bg-blue-500 text-xs">프리미엄</Badge>}
             </button>
 
+            <button 
+              onClick={() => handleMenuClick('showcase')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('showcase') 
+                  ? 'text-purple-600 bg-purple-50' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="nav-showcase"
+            >
+              <i className="fas fa-cubes mr-1"></i> 모듈
+            </button>
+
             {(user as any)?.isAdmin && (
               <button 
                 onClick={() => setCurrentPage('admin')}
@@ -202,6 +214,18 @@ export default function NavigationHeader() {
                 {(user as any)?.subscriptionTier === 'starter' && <Badge className="bg-green-500 text-xs">스타터</Badge>}
                 {(user as any)?.subscriptionTier === 'pro' && <Badge className="bg-purple-500 text-xs">프로</Badge>}
                 {(user as any)?.subscriptionTier === 'premium' && <Badge className="bg-blue-500 text-xs">프리미엄</Badge>}
+              </button>
+
+              <button 
+                onClick={() => handleMenuClick('showcase')}
+                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('showcase') 
+                    ? 'text-purple-600 bg-purple-50' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                data-testid="mobile-nav-showcase"
+              >
+                <i className="fas fa-cubes mr-2"></i> 모듈 라이브러리
               </button>
 
               {(user as any)?.isAdmin && (
