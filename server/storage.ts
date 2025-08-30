@@ -68,8 +68,8 @@ export class DatabaseStorage implements IStorage {
 
   // Learning session operations
   async createSession(sessionData: InsertSession): Promise<LearningSession> {
-    const [session] = await db.insert(learningSessions).values([sessionData]).returning();
-    return session[0];
+    const [session] = await db.insert(learningSessions).values(sessionData).returning();
+    return session;
   }
 
   async getSession(id: string): Promise<LearningSession | undefined> {

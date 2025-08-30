@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { isAuthenticated, isAdmin } from "./auth";
-import { setupAuth } from "./auth";
+import { isAuthenticated, isAdmin, setupAuth, hashPassword } from "./auth";
+import passport from "passport";
 
 // Pricing helper function
 function getTierPrice(tier: string): number {
@@ -27,6 +27,63 @@ function getPaddlePriceId(tier: string): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
+
+  // Authentication endpoints
+  app.post("/api/register", async (req, res, next) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+      
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "사용자가 이미 존재합니다" });
+      }
+
+      // Hash password
+      const hashedPassword = await hashPassword(password);
+
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        subscriptionTier: 'free',
+        subscriptionStatus: 'active'
+      });
+
+      req.login(user, (err: any) => {
+        if (err) return next(err);
+        res.status(201).json(user);
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "등록 실패" });
+    }
+  });
+
+  app.post("/api/login", passport.authenticate("local"), (req, res) => {
+    res.status(200).json(req.user);
+  });
+
+  app.post("/api/logout", (req, res) => {
+    req.logout((err: any) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.get("/api/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Get user error:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
 
   // Payment routes for Korean providers
   // Usage limit checking endpoint
