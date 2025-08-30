@@ -72,38 +72,9 @@ export function setupAuth(app: Express) {
     )
   );
 
-  // Google OAuth Strategy
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: "https://fluent-drama-mainstop3.replit.app/api/google/callback",
-      },
-      async (accessToken, refreshToken, profile, done) => {
-        try {
-          const email = profile.emails?.[0]?.value;
-          if (!email) {
-            return done(new Error("No email found in Google profile"));
-          }
-
-          let user = await storage.getUserByEmail(email);
-          if (!user) {
-            // Create new user
-            user = await storage.createUser({
-              email,
-              firstName: profile.name?.givenName || "",
-              lastName: profile.name?.familyName || "",
-              profileImageUrl: profile.photos?.[0]?.value,
-            });
-          }
-          return done(null, user);
-        } catch (error) {
-          return done(error);
-        }
-      }
-    )
-  );
+  // Google OAuth Strategy - DISABLED due to Replit domain restrictions
+  // Google OAuth does not allow .replit.app domains
+  // Alternative: Use custom domain or remove Google OAuth entirely
 
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: string, done) => {
@@ -196,16 +167,15 @@ export function setupAuth(app: Express) {
     res.json(req.user);
   });
 
-  // Google OAuth routes
-  app.get("/api/google", 
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
+  // Google OAuth routes - DISABLED
+  // Replit domains are not supported by Google OAuth
+  app.get("/api/google", (req, res) => {
+    res.status(503).json({ 
+      message: "Google OAuth not available on Replit domains. Use email/password login." 
+    });
+  });
 
-  app.get("/api/google/callback",
-    passport.authenticate("google", { failureRedirect: "/" }),
-    (req, res) => {
-      // Successful authentication, redirect home
-      res.redirect("/");
-    }
-  );
+  app.get("/api/google/callback", (req, res) => {
+    res.redirect("/?error=oauth_not_supported");
+  });
 }
