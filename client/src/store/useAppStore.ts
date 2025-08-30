@@ -19,7 +19,7 @@ export interface Scenario {
 
 export interface AppState {
   // Navigation
-  currentPage: 'landing' | 'auth' | 'home' | 'character' | 'scenario' | 'playground' | 'user-home' | 'subscription';
+  currentPage: 'landing' | 'auth' | 'home' | 'character' | 'scenario' | 'playground' | 'user-home' | 'subscription' | 'admin';
   
   // Learning State
   audience: Audience | null;

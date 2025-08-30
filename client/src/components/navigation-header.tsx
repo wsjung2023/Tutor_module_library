@@ -73,12 +73,12 @@ export default function NavigationHeader() {
               data-testid="nav-subscription"
             >
               <i className="fas fa-crown mr-1"></i> 구독
-              {user?.subscriptionTier === 'starter' && <Badge className="bg-green-500 text-xs">스타터</Badge>}
-              {user?.subscriptionTier === 'pro' && <Badge className="bg-purple-500 text-xs">프로</Badge>}
-              {user?.subscriptionTier === 'premium' && <Badge className="bg-blue-500 text-xs">프리미엄</Badge>}
+              {(user as any)?.subscriptionTier === 'starter' && <Badge className="bg-green-500 text-xs">스타터</Badge>}
+              {(user as any)?.subscriptionTier === 'pro' && <Badge className="bg-purple-500 text-xs">프로</Badge>}
+              {(user as any)?.subscriptionTier === 'premium' && <Badge className="bg-blue-500 text-xs">프리미엄</Badge>}
             </button>
 
-            {user?.isAdmin && (
+            {(user as any)?.isAdmin && (
               <button 
                 onClick={() => setCurrentPage('admin')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${

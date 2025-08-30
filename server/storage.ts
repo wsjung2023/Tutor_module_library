@@ -29,6 +29,9 @@ export interface IStorage {
   // Admin methods
   getAllUsers(): Promise<User[]>;
   resetUserUsage(userId: string): Promise<User | undefined>;
+  
+  // Usage tracking methods
+  incrementUsage(userId: string, type: 'conversation' | 'imageGeneration' | 'tts'): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -65,8 +68,8 @@ export class DatabaseStorage implements IStorage {
 
   // Learning session operations
   async createSession(sessionData: InsertSession): Promise<LearningSession> {
-    const [session] = await db.insert(learningSessions).values(sessionData).returning();
-    return session;
+    const [session] = await db.insert(learningSessions).values([sessionData]).returning();
+    return session[0];
   }
 
   async getSession(id: string): Promise<LearningSession | undefined> {
@@ -110,14 +113,42 @@ export class DatabaseStorage implements IStorage {
     const [updatedUser] = await db
       .update(users)
       .set({
-        dailyUsageCount: '0',
-        monthlyImageCount: '0',
+        conversationCount: "0",
+        imageGenerationCount: "0", 
+        ttsUsageCount: "0",
+        dailyUsageCount: "0",
+        monthlyImageCount: "0",
         lastUsageReset: new Date(),
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
       .returning();
     
     return updatedUser;
+  }
+
+  async incrementUsage(userId: string, type: 'conversation' | 'imageGeneration' | 'tts'): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    const updates: Partial<User> = { updatedAt: new Date() };
+    
+    switch (type) {
+      case 'conversation':
+        updates.conversationCount = String(parseInt(user.conversationCount || '0') + 1);
+        break;
+      case 'imageGeneration':
+        updates.imageGenerationCount = String(parseInt(user.imageGenerationCount || '0') + 1);
+        break;
+      case 'tts':
+        updates.ttsUsageCount = String(parseInt(user.ttsUsageCount || '0') + 1);
+        break;
+    }
+
+    await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, userId));
   }
 }
 

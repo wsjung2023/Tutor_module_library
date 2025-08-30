@@ -261,6 +261,223 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Learning API Endpoints
+  app.post('/api/generate-image', async (req: any, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const { name, gender, style, audience } = req.body;
+      const userId = req.user.id;
+
+      // Check usage limits
+      const usageCheck = await checkUsageLimit(userId);
+      if (!usageCheck.canUse) {
+        return res.status(429).json({ 
+          message: "사용 한도에 도달했습니다. 구독을 업그레이드해주세요.",
+          currentUsage: usageCheck.currentUsage,
+          limit: usageCheck.limit
+        });
+      }
+
+      // Generate character image using OpenAI DALL-E
+      const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: `A friendly ${gender} English tutor character named ${name} with a ${style} personality, designed for ${audience} audience. Professional, clean, anime-style illustration with a warm expression, suitable for educational content.`,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+          style: "vivid"
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+      }
+
+      const imageData = await openaiResponse.json();
+      const imageUrl = imageData.data[0].url;
+
+      // Increment usage
+      await storage.incrementUsage(userId, 'imageGeneration');
+
+      res.json({ 
+        imageUrl,
+        character: { name, gender, style },
+        message: "캐릭터 이미지가 생성되었습니다!"
+      });
+
+    } catch (error) {
+      console.error('Image generation error:', error);
+      res.status(500).json({ 
+        message: "이미지 생성 중 오류가 발생했습니다.",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post('/api/generate-dialogue', async (req: any, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const { character, scenario, messages } = req.body;
+      const userId = req.user.id;
+
+      // Check usage limits
+      const usageCheck = await checkUsageLimit(userId);
+      if (!usageCheck.canUse) {
+        return res.status(429).json({ 
+          message: "사용 한도에 도달했습니다. 구독을 업그레이드해주세요.",
+          currentUsage: usageCheck.currentUsage,
+          limit: usageCheck.limit
+        });
+      }
+
+      // Generate dialogue using OpenAI GPT-4
+      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are ${character.name}, a ${character.gender} English tutor with a ${character.style} personality. You're helping students practice English conversation in a ${scenario.presetKey || 'general'} scenario. Respond naturally and provide helpful corrections when needed. Keep responses conversational and encouraging.`
+            },
+            ...messages
+          ],
+          max_tokens: 150,
+          temperature: 0.8,
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+      }
+
+      const dialogueData = await openaiResponse.json();
+      const response = dialogueData.choices[0].message.content;
+
+      // Increment usage
+      await storage.incrementUsage(userId, 'conversation');
+
+      res.json({ 
+        response,
+        character: character.name,
+        message: "대화가 생성되었습니다!"
+      });
+
+    } catch (error) {
+      console.error('Dialogue generation error:', error);
+      res.status(500).json({ 
+        message: "대화 생성 중 오류가 발생했습니다.",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post('/api/tts', async (req: any, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const { text, character } = req.body;
+      const userId = req.user.id;
+
+      // Check usage limits
+      const usageCheck = await checkUsageLimit(userId);
+      if (!usageCheck.canUse) {
+        return res.status(429).json({ 
+          message: "사용 한도에 도달했습니다. 구독을 업그레이드해주세요.",
+          currentUsage: usageCheck.currentUsage,
+          limit: usageCheck.limit
+        });
+      }
+
+      // Generate TTS using OpenAI
+      const voice = character.gender === 'female' ? 'nova' : 'echo';
+      
+      const openaiResponse = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "tts-1",
+          input: text,
+          voice: voice,
+          response_format: "mp3"
+        }),
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI TTS API error: ${openaiResponse.status}`);
+      }
+
+      const audioBuffer = await openaiResponse.arrayBuffer();
+      const audioBase64 = Buffer.from(audioBuffer).toString('base64');
+
+      // Increment usage
+      await storage.incrementUsage(userId, 'tts');
+
+      res.json({ 
+        audioUrl: `data:audio/mp3;base64,${audioBase64}`,
+        message: "음성이 생성되었습니다!"
+      });
+
+    } catch (error) {
+      console.error('TTS generation error:', error);
+      res.status(500).json({ 
+        message: "음성 생성 중 오류가 발생했습니다.",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Helper function for usage limit checking
+  async function checkUsageLimit(userId: string) {
+    try {
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return { canUse: false, currentUsage: 0, limit: 0 };
+      }
+
+      const tier = user.subscriptionTier || 'free';
+      const limits = {
+        'free': 30,
+        'starter': 300,
+        'pro': 1000,
+        'premium': 5000
+      };
+
+      const limit = limits[tier as keyof typeof limits] || 30;
+      const currentUsage = parseInt(user.conversationCount || '0');
+
+      return {
+        canUse: currentUsage < limit,
+        currentUsage,
+        limit
+      };
+    } catch (error) {
+      console.error('Usage limit check error:', error);
+      return { canUse: false, currentUsage: 0, limit: 0 };
+    }
+  }
+
   const httpServer = createServer(app);
   return httpServer;
 }

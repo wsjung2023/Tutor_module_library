@@ -29,8 +29,12 @@ export const users = pgTable("users", {
   subscriptionId: varchar("subscription_id"),
   subscriptionExpiresAt: timestamp("subscription_expires_at"),
   // Usage tracking
-  dailyUsageCount: varchar("daily_usage_count").default("0"), // Monthly usage for free tier
-  monthlyImageCount: varchar("monthly_image_count").default("0"), // Track image generation
+  conversationCount: varchar("conversation_count").default("0"), // Monthly conversation usage
+  imageGenerationCount: varchar("image_generation_count").default("0"), // Track image generation
+  ttsUsageCount: varchar("tts_usage_count").default("0"), // Track TTS usage
+  // Keep old fields for compatibility during migration
+  dailyUsageCount: varchar("daily_usage_count").default("0"),
+  monthlyImageCount: varchar("monthly_image_count").default("0"),
   lastUsageReset: timestamp("last_usage_reset").defaultNow(),
   // Admin role
   isAdmin: boolean("is_admin").default(false),
