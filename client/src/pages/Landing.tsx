@@ -75,45 +75,70 @@ export default function Landing() {
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <Card className="border-gray-200">
               <CardHeader>
-                <CardTitle>무료 플랜</CardTitle>
+                <CardTitle>Free</CardTitle>
                 <CardDescription className="text-2xl font-bold">₩0/월</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✅ 일일 3회 대화 세션</li>
-                  <li>✅ 기본 시나리오 제공</li>
-                  <li>✅ 발음 피드백</li>
-                  <li>❌ 캐릭터 1개 제한</li>
+                  <li>✅ 월 30회 대화</li>
+                  <li>✅ 이미지 생성 1장</li>
+                  <li>✅ 기본 TTS 음성</li>
+                  <li>✅ 워터마크 포함</li>
                 </ul>
               </CardContent>
             </Card>
 
             <Card className="border-blue-500 shadow-lg">
               <CardHeader>
-                <CardTitle>프리미엄 플랜</CardTitle>
-                <CardDescription className="text-2xl font-bold text-blue-600">₩9,900/월</CardDescription>
+                <CardTitle>Starter</CardTitle>
+                <CardDescription className="text-2xl font-bold text-blue-600">₩4,900/월</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✅ 무제한 대화 세션</li>
-                  <li>✅ 모든 시나리오 이용</li>
-                  <li>✅ 캐릭터 무제한 생성</li>
-                  <li>✅ 상세 학습 리포트</li>
+                  <li>✅ 월 300회 대화</li>
+                  <li>✅ 이미지 생성 15장</li>
+                  <li>✅ 프리미엄 TTS 음성 5종</li>
+                  <li>✅ 대화 저장/내보내기</li>
                 </ul>
               </CardContent>
             </Card>
 
             <Card className="border-purple-500">
               <CardHeader>
-                <CardTitle>프로 플랜</CardTitle>
-                <CardDescription className="text-2xl font-bold text-purple-600">₩19,900/월</CardDescription>
+                <CardTitle>Pro</CardTitle>
+                <CardDescription className="text-2xl font-bold text-purple-600">₩9,900/월</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✅ 프리미엄 모든 기능</li>
-                  <li>✅ 개인 맞춤 시나리오</li>
-                  <li>✅ 1:1 튜터링 예약</li>
-                  <li>✅ API 액세스</li>
+                  <li>✅ 월 600회 대화</li>
+                  <li>✅ 이미지 생성 25장</li>
+                  <li>✅ 모든 TTS 음성 10종</li>
+                  <li>✅ 시나리오 커스터마이징</li>
+                  <li>✅ 발음 교정 AI</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Premium Plan - Separate Section */}
+          <div className="max-w-md mx-auto mt-8">
+            <Card className="border-gradient-to-r from-purple-500 to-pink-500 shadow-2xl">
+              <CardHeader className="text-center">
+                <div className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full mb-2">
+                  최고급
+                </div>
+                <CardTitle>Premium</CardTitle>
+                <CardDescription className="text-3xl font-bold text-purple-600">₩19,900/월</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li>✅ 월 1,200회 대화</li>
+                  <li>✅ 이미지 생성 60장</li>
+                  <li>✅ HD 이미지 생성 무제한</li>
+                  <li>✅ 실시간 음성 대화</li>
+                  <li>✅ 개인 맞춤 학습 분석</li>
+                  <li>✅ API 접근 권한</li>
+                  <li>✅ 우선 고객지원</li>
                 </ul>
               </CardContent>
             </Card>
