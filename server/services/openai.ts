@@ -58,11 +58,12 @@ export async function generateCharacterImage(request: GenerateImageRequest): Pro
   const outfit = getOutfitForScenario(scenario || 'restaurant', style);
   const pose = getPoseForStyle(style);
   
-  const prompt = `A full-length portrait photo of a real human ${gender}, head-to-toe fully visible in frame, standing ${pose}, wearing ${outfit}, at ${background}.
+  const prompt = `FULL BODY SHOT: A complete head-to-toe portrait photo of a real human ${gender}, ENTIRE BODY including feet and shoes fully visible and uncropped in frame, standing ${pose}, wearing ${outfit}, at ${background}.
+IMPORTANT: Show complete person from top of head to bottom of feet, no cropping at ankles or legs, full-length portrait with plenty of space around subject.
 Ultra photorealistic, unedited RAW look, natural skin texture and pores, realistic proportions.
 Shot on DSLR, 35–50mm lens, f/2.8, soft natural light, slight film grain, shallow depth of field, balanced colors.
-Composition: vertical, full-body, include feet, subject centered, clean background separation (subtle bokeh).
-No illustration, no anime, no 3D render, no doll-like face, no over-smoothing, no plastic skin, no exaggerated eyes.`;
+Composition: vertical full-body portrait, complete person visible, include feet and shoes, subject centered with adequate framing space, clean background separation (subtle bokeh).
+No illustration, no anime, no 3D render, no doll-like face, no over-smoothing, no plastic skin, no exaggerated eyes, no cropping at feet or legs.`;
 
   try {
     const response = await openai.images.generate({
