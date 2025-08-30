@@ -553,12 +553,8 @@ Respond in JSON format:
       // Start loading the audio
       audioRef.current.load();
     } else {
-      console.error('No OpenAI audio URL provided');
-      toast({
-        title: "Voice Error",
-        description: "No audio available - OpenAI TTS required",
-        variant: "destructive"
-      });
+      console.warn('No audio URL provided - skipping audio playback');
+      // No toast notification for missing audio to avoid spam
     }
   };
 
