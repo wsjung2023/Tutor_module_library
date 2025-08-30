@@ -34,7 +34,7 @@ export function setupAuth(app: Express) {
   const PostgresSessionStore = connectPg(session);
   const sessionStore = new PostgresSessionStore({ 
     pool, 
-    createTableIfMissing: true 
+    createTableIfMissing: false // 테이블이 이미 존재하므로 false로 설정
   });
 
   const sessionSettings: session.SessionOptions = {

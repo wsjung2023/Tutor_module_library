@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAppStore } from "@/store/useAppStore";
 import { useAuth } from "@/hooks/useAuth";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { DebugPanel } from "@/components/debug-panel";
 
 import NavigationHeader from "@/components/navigation-header";
 import LoadingModal from "@/components/loading-modal";
@@ -14,7 +15,7 @@ import ErrorModal from "@/components/error-modal";
 import Auth from "@/pages/Auth";
 import UserHome from "@/pages/Home";
 import Subscription from "@/pages/Subscription";
-import Home from "@/pages/home";
+import Home from "@/pages/Home";
 import Character from "@/pages/character";
 import Scenario from "@/pages/scenario";
 import Playground from "@/pages/playground";
@@ -77,6 +78,7 @@ function AppContent() {
       <ErrorModal />
       <PWAInstallPrompt />
       <Toaster />
+      <DebugPanel />
     </TooltipProvider>
   );
 }
