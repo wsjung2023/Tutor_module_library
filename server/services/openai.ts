@@ -58,12 +58,11 @@ export async function generateCharacterImage(request: GenerateImageRequest): Pro
   const outfit = getOutfitForScenario(scenario || 'restaurant', style);
   const pose = getPoseForStyle(style);
   
-  const prompt = `FULL BODY SHOT: A complete head-to-toe portrait photo of a real human ${gender}, ENTIRE BODY including feet and shoes fully visible and uncropped in frame, standing ${pose}, wearing ${outfit}, at ${background}.
-IMPORTANT: Show complete person from top of head to bottom of feet, no cropping at ankles or legs, full-length portrait with plenty of space around subject.
-Ultra photorealistic, unedited RAW look, natural skin texture and pores, realistic proportions.
-Shot on DSLR, 35–50mm lens, f/2.8, soft natural light, slight film grain, shallow depth of field, balanced colors.
-Composition: vertical full-body portrait, complete person visible, include feet and shoes, subject centered with adequate framing space, clean background separation (subtle bokeh).
-No illustration, no anime, no 3D render, no doll-like face, no over-smoothing, no plastic skin, no exaggerated eyes, no cropping at feet or legs.`;
+  const prompt = `Wide angle full body photograph of a real human ${gender} person standing ${pose}, wearing ${outfit}, at ${background}. CRITICAL: Show the COMPLETE person from head to feet - legs, ankles, shoes all visible. Wide framing to include entire body. Full-length standing portrait with the person's feet clearly visible at the bottom of the image. Camera positioned far enough back to capture whole body without any cropping of limbs. Complete figure visible from top of head down to floor/ground showing feet and footwear.
+Ultra photorealistic, unedited RAW look, natural skin texture and pores, realistic human proportions.
+Shot on DSLR with wide angle lens to capture full body, f/2.8, soft natural light, slight film grain, balanced colors.
+Vertical composition showing complete standing figure, adequate distance from subject to show full body, feet visible at bottom of frame, clean background.
+No illustration, no anime, no 3D render, no doll-like face, no over-smoothing, no plastic skin, no exaggerated eyes. NO HEAD-AND-SHOULDERS CROPPING, NO WAIST-UP SHOTS.`;
 
   try {
     const response = await openai.images.generate({
