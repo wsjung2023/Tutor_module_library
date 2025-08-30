@@ -1,8 +1,3 @@
-// Payment Module - Main Export File
-export * from './components/PaddlePaymentProvider';
-export * from './components/SubscriptionManager';
-export * from './components/PricingPlans';
-export * from './api/PaymentAPI';
+// SB Payment Module - Main Export File
 export * from './types/payment';
-export * from './hooks/usePayment';
-export * from './utils/paymentHelpers';
+// Components and other exports will be added as we create them

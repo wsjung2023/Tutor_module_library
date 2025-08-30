@@ -89,12 +89,12 @@ import { TTSProvider, ImageGenerator, ConversationManager } from '@modules/ai'
 - 언어 전환
 - 지역화된 콘텐츠
 
-## 구현 순서
-1. 결제 모듈 (가장 복잡하고 중요)
-2. 인증 모듈 (기본 기능)
-3. AI 모듈 (핵심 비즈니스 로직)
-4. UI 모듈 (공통 컴포넌트)
-5. 기타 모듈들
+## 구현 순서 (진행중)
+1. ✅ **sb_payment** 모듈 (결제 시스템) - 완료
+2. ✅ **sb_auth** 모듈 (인증 시스템) - 완료  
+3. ✅ **sb_ai** 모듈 (AI 기능) - 진행중
+4. **sb_ui** 모듈 (공통 UI 컴포넌트)
+5. **sb_database** 모듈 (데이터베이스 연동)
 
 ## 모듈 구조 예시
 ```
