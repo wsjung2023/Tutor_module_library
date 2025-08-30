@@ -4,6 +4,16 @@ import { storage } from "./storage";
 import { isAuthenticated, isAdmin } from "./auth";
 import { setupAuth } from "./auth";
 
+// Pricing helper function
+function getTierPrice(tier: string): number {
+  switch (tier) {
+    case 'starter': return 4900; // ₩4,900
+    case 'pro': return 9900; // ₩9,900
+    case 'premium': return 19900; // ₩19,900
+    default: return 0;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
@@ -194,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              amount: paymentAmount,
+              amount: getTierPrice(tier),
               orderId: `order_${userId}_${Date.now()}`,
               orderName: `AI English Tutor ${tier} 플랜`,
               customerEmail: req.user.email,
@@ -236,15 +246,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${process.env.PADDLE_API_KEY}`,
+              'Paddle-Version': '1',
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               items: [{
-                price_id: `price_${tier}`,
+                price_id: `pri_${tier}_monthly`,
                 quantity: 1
               }],
-              customer_id: userId,
-              collection_mode: 'automatic'
+              collection_mode: 'automatic',
+              custom_data: {
+                user_id: userId,
+                tier: tier
+              }
             })
           });
 
