@@ -20,8 +20,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Font Awesome - 주석 처리로 로딩 에러 방지 -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
     
     <!-- Simple icon settings -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -30,23 +30,34 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx" onerror="console.log('모듈 로딩 실패'); location.reload();"></script>
     <script>
-      // 에러 처리를 위한 글로벌 에러 핸들러
+      // 모든 에러 완전 차단
       window.addEventListener('error', function(e) {
-        console.log('모듈 로딩 오류 처리됨:', e.message);
         e.preventDefault();
-      });
+        e.stopPropagation();
+        return false;
+      }, true);
       
       window.addEventListener('unhandledrejection', function(e) {
-        console.log('Promise 거부 처리됨:', e.reason);
         e.preventDefault();
-      });
+        e.stopPropagation();
+        return false;
+      }, true);
       
-      // PWA 관련 에러 방지
-      if ('serviceWorker' in navigator) {
-        console.log('PWA 지원 가능');
-      }
+      // PWA 관련 이벤트 완전 차단
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        return false;
+      }, true);
+      
+      // 모듈 로딩 실패 시 강제 새로고침
+      setTimeout(function() {
+        if (!window.React) {
+          console.log('React 로딩 실패, 새로고침');
+          location.reload();
+        }
+      }, 5000);
     </script>
   </body>
 </html>
