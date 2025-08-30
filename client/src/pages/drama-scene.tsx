@@ -218,29 +218,39 @@ export default function DramaScene() {
   const generateOpeningLine = (scenarioConfig: ScenarioConfig): string => {
     const openings: Record<string, string[]> = {
       restaurant: [
-        "Good evening! Welcome to our restaurant. I'm Sarah, and I'll be taking care of you tonight. Have you dined with us before?",
-        "Hello! Thank you for choosing our restaurant this evening. May I start you with our sommelier's wine recommendation?",
-        "Welcome! I'm delighted you're here. Our chef has prepared some exceptional specials tonight - would you like to hear about them?"
+        `Good evening! Welcome to our restaurant. I'm ${character.name}, and I'll be taking care of you tonight. Have you dined with us before?`,
+        `Hello! Thank you for choosing our restaurant this evening. I'm ${character.name}. May I start you with our sommelier's wine recommendation?`,
+        `Welcome! I'm ${character.name}, and I'm delighted you're here. Our chef has prepared some exceptional specials tonight - would you like to hear about them?`
       ],
       airport: [
-        "Good afternoon! Welcome aboard our business class service. I'm Jennifer, your flight attendant. May I offer you a welcome drink?",
-        "Hello! Thank you for flying with us today. I see you're in 3A - one of our premium seats. How was your airport experience?",
-        "Welcome aboard! I'm here to ensure you have a comfortable flight. Would you like me to hang up your jacket?"
+        `Good afternoon! Welcome aboard our business class service. I'm ${character.name}, your flight attendant. May I offer you a welcome drink?`,
+        `Hello! Thank you for flying with us today. I'm ${character.name}. I see you're in 3A - one of our premium seats. How was your airport experience?`,
+        `Welcome aboard! I'm ${character.name}, and I'm here to ensure you have a comfortable flight. Would you like me to hang up your jacket?`
       ],
       coffee_shop: [
-        "Hey there! Welcome to our little coffee haven. I'm Mike - what can I create for you today?",
-        "Good morning! Love the weather today, isn't it perfect for our outdoor seating? What sounds good to you?",
-        "Hi! First time here? You've got to try our signature cold brew - it's locally roasted and absolutely amazing!"
+        `Hey there! Welcome to our little coffee haven. I'm ${character.name} - what can I create for you today?`,
+        `Good morning! I'm ${character.name}. Love the weather today, isn't it perfect for our outdoor seating? What sounds good to you?`,
+        `Hi! I'm ${character.name}. First time here? You've got to try our signature cold brew - it's locally roasted and absolutely amazing!`
       ],
       business_meeting: [
-        "Good morning everyone. Thank you for making time for today's meeting. I'm excited to discuss our new initiative with you.",
-        "Hello team. I appreciate you all being here. Shall we begin with a quick overview of where we stand?",
-        "Welcome! Before we dive into the agenda, how did the preliminary research go on your end?"
+        `Good morning everyone. I'm ${character.name}. Thank you for making time for today's meeting. I'm excited to discuss our new initiative with you.`,
+        `Hello team. I'm ${character.name}, and I appreciate you all being here. Shall we begin with a quick overview of where we stand?`,
+        `Welcome! I'm ${character.name}. Before we dive into the agenda, how did the preliminary research go on your end?`
       ],
       hotel: [
-        "Welcome to the Grand Plaza! I'm Alexandra, your personal concierge. How was your journey here?",
-        "Good afternoon! We're so pleased to have you staying with us. Is this your first visit to our city?",
-        "Hello! Welcome to our hotel. I see you've booked our executive suite - excellent choice. May I arrange anything special for your stay?"
+        `Welcome to the Grand Plaza! I'm ${character.name}, your personal concierge. How was your journey here?`,
+        `Good afternoon! I'm ${character.name}, and we're so pleased to have you staying with us. Is this your first visit to our city?`,
+        `Hello! I'm ${character.name}. Welcome to our hotel. I see you've booked our executive suite - excellent choice. May I arrange anything special for your stay?`
+      ],
+      cafeteria: [
+        `Hi there! I'm ${character.name}, and welcome to our cafeteria! What would you like for lunch today?`,
+        `Good afternoon! I'm ${character.name}. Our daily special looks amazing today - would you like to hear about it?`,
+        `Hey! I'm ${character.name}. First time in our cafeteria? Let me help you find something delicious!`
+      ],
+      club: [
+        `Welcome to our club! I'm ${character.name}, the club leader. We're so excited to have you join us!`,
+        `Hi there! I'm ${character.name}. Thanks for coming to our club meeting - what brings you here today?`,
+        `Hello! I'm ${character.name}, and welcome to our weekly gathering. What are you most interested in learning about?`
       ]
     };
     
@@ -498,7 +508,7 @@ Respond in JSON format:
   };
 
   const playAudioWithFallback = (text: string, audioUrl?: string) => {
-    // Prioritize OpenAI TTS audio
+    // Only use OpenAI TTS - no browser TTS fallback
     if (audioUrl && audioRef.current) {
       console.log('Playing OpenAI TTS audio');
       audioRef.current.src = audioUrl;
@@ -506,127 +516,41 @@ Respond in JSON format:
         audioRef.current?.play()
           .then(() => {
             console.log('OpenAI TTS audio played successfully');
-            // Hide any previous fallback messages
             toast({
               title: "🎭 AI Voice Active",
               description: "High-quality voice synthesis playing"
             });
           })
           .catch(error => {
-            console.error('OpenAI TTS audio failed, using browser TTS:', error);
-            speakWithBrowserTTS(text);
+            console.error('OpenAI TTS audio playback failed:', error);
+            toast({
+              title: "Audio Error",
+              description: "Failed to play audio",
+              variant: "destructive"
+            });
           });
       };
       audioRef.current.onerror = (error) => {
         console.error('Audio loading error:', error);
-        speakWithBrowserTTS(text);
+        toast({
+          title: "Audio Error", 
+          description: "Failed to load audio",
+          variant: "destructive"
+        });
       };
       // Start loading the audio
       audioRef.current.load();
     } else {
-      // Fallback to browser TTS
-      console.log('No OpenAI audio URL provided, using browser TTS fallback');
-      speakWithBrowserTTS(text);
+      console.error('No OpenAI audio URL provided');
+      toast({
+        title: "Voice Error",
+        description: "No audio available - OpenAI TTS required",
+        variant: "destructive"
+      });
     }
   };
 
-  const speakWithBrowserTTS = (text: string) => {
-    if ('speechSynthesis' in window) {
-      // Cancel any ongoing speech
-      speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.85;
-      utterance.pitch = character.gender === 'female' ? 1.3 : 0.8;
-      utterance.volume = 0.9;
-      
-      // Wait for voices to load
-      const setVoice = () => {
-        const voices = speechSynthesis.getVoices();
-        console.log('Available voices:', voices.map(v => v.name));
-        console.log('Character gender:', character.gender);
-        
-        let selectedVoice;
-        
-        if (character.gender === 'female') {
-          // Try multiple female voice patterns
-          selectedVoice = voices.find(voice => {
-            const name = voice.name.toLowerCase();
-            return name.includes('female') || 
-                   name.includes('woman') ||
-                   name.includes('samantha') ||
-                   name.includes('karen') ||
-                   name.includes('zira') ||
-                   name.includes('susan') ||
-                   name.includes('anna') ||
-                   name.includes('helen') ||
-                   name.includes('catherine');
-          });
-          
-          // Fallback: find voice with higher pitch or female-sounding characteristics
-          if (!selectedVoice) {
-            selectedVoice = voices.find(voice => {
-              const name = voice.name.toLowerCase();
-              return !name.includes('male') && 
-                     !name.includes('man') && 
-                     !name.includes('david') && 
-                     !name.includes('mark');
-            });
-          }
-        } else {
-          selectedVoice = voices.find(voice => {
-            const name = voice.name.toLowerCase();
-            return name.includes('male') || 
-                   name.includes('man') ||
-                   name.includes('david') ||
-                   name.includes('mark') ||
-                   name.includes('paul') ||
-                   name.includes('alex');
-          });
-        }
-        
-        if (selectedVoice) {
-          utterance.voice = selectedVoice;
-          console.log(`Selected voice: ${selectedVoice.name} for ${character.gender} character`);
-        } else {
-          console.log(`No specific ${character.gender} voice found, using default`);
-        }
-      };
-      
-      // Set voice immediately if available, otherwise wait for voiceschanged event
-      if (speechSynthesis.getVoices().length > 0) {
-        setVoice();
-      } else {
-        speechSynthesis.onvoiceschanged = setVoice;
-      }
-      
-      utterance.onstart = () => {
-        console.log('Browser TTS started');
-        console.log(`Using voice: ${utterance.voice?.name || 'default'} for ${character.gender} character`);
-      };
-      utterance.onend = () => console.log('Browser TTS finished');
-      utterance.onerror = (error) => console.error('Browser TTS error:', error);
-      
-      // Small delay to ensure voice is set
-      setTimeout(() => {
-        speechSynthesis.speak(utterance);
-      }, 100);
-      
-      toast({
-        title: "⚠️ Fallback Voice",
-        description: "Using system voice - OpenAI TTS unavailable",
-        variant: "destructive"
-      });
-    } else {
-      console.error('Browser TTS not supported');
-      toast({
-        title: "Voice Not Available",
-        description: "Your browser doesn't support text-to-speech.",
-        variant: "destructive"
-      });
-    }
-  };
+  // Browser TTS completely removed - only OpenAI TTS is used
 
   const playAudio = (turn: DialogueTurn) => {
     playAudioWithFallback(turn.text, turn.audioUrl);
