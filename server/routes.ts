@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { isAuthenticated } from "./auth";
+import { isAuthenticated, isAdmin } from "./auth";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -300,7 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoints
-  app.get("/api/admin/users", isAuthenticated, async (req, res) => {
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/user/:email", isAuthenticated, async (req, res) => {
+  app.get("/api/admin/user/:email", isAdmin, async (req, res) => {
     try {
       const { email } = req.params;
       const user = await storage.getUserByEmail(decodeURIComponent(email));
@@ -324,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/user/:id/subscription", isAuthenticated, async (req, res) => {
+  app.put("/api/admin/user/:id/subscription", isAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { tier } = req.body;
@@ -345,7 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/user/:id/reset-usage", isAuthenticated, async (req, res) => {
+  app.put("/api/admin/user/:id/reset-usage", isAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       

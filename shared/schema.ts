@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, jsonb, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -32,6 +32,8 @@ export const users = pgTable("users", {
   dailyUsageCount: varchar("daily_usage_count").default("0"), // Monthly usage for free tier
   monthlyImageCount: varchar("monthly_image_count").default("0"), // Track image generation
   lastUsageReset: timestamp("last_usage_reset").defaultNow(),
+  // Admin role
+  isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

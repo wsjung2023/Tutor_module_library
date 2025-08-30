@@ -217,3 +217,11 @@ export function isAuthenticated(req: any, res: any, next: any) {
   }
   res.status(401).json({ message: "Unauthorized" });
 }
+
+// Admin authentication middleware
+export function isAdmin(req: any, res: any, next: any) {
+  if (req.isAuthenticated() && req.user?.isAdmin === true) {
+    return next();
+  }
+  res.status(403).json({ message: "Admin access required" });
+}
