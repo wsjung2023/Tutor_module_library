@@ -14,6 +14,7 @@ import LoadingModal from "@/components/loading-modal";
 import ErrorModal from "@/components/error-modal";
 
 import Auth from "@/pages/Auth";
+import Landing from "@/pages/Landing";
 import UserHome from "@/pages/Home";
 import Subscription from "@/pages/Subscription";
 import Character from "@/pages/character";
@@ -33,9 +34,12 @@ function Router() {
     );
   }
 
-  // Show auth page if not authenticated
+  // Show landing page or auth page if not authenticated
   if (!isAuthenticated) {
-    return <Auth />;
+    if (currentPage === 'auth') {
+      return <Auth />;
+    }
+    return <Landing />;
   }
 
   // Show subscription page if accessing subscription route

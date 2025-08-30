@@ -19,7 +19,7 @@ export interface Scenario {
 
 export interface AppState {
   // Navigation
-  currentPage: 'home' | 'character' | 'scenario' | 'playground' | 'user-home' | 'subscription';
+  currentPage: 'landing' | 'auth' | 'home' | 'character' | 'scenario' | 'playground' | 'user-home' | 'subscription';
   
   // Learning State
   audience: Audience | null;
@@ -50,7 +50,7 @@ export interface AppState {
 }
 
 const initialState = {
-  currentPage: 'home' as const,
+  currentPage: 'landing' as const,
   audience: null,
   character: {
     name: '',

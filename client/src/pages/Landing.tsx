@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function Landing() {
+  const { setCurrentPage } = useAppStore();
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-16">
@@ -14,7 +16,7 @@ export default function Landing() {
             드라마틱한 시나리오로 영어를 배우세요! AI 캐릭터와 실제 상황을 연습하며 자연스럽게 영어 실력을 향상시킬 수 있습니다.
           </p>
           <Button 
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => setCurrentPage('auth')}
             size="lg"
             className="text-lg px-8 py-3"
             data-testid="button-login"
