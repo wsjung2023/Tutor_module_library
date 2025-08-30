@@ -57,9 +57,9 @@ export default function Home() {
             className="hover:shadow-lg transition-shadow cursor-pointer" 
             data-testid="card-quick-start"
             onClick={() => {
-              // 빠른시작: 학습 상태 초기화 후 대상선택부터 시작 
+              // 빠른시작: 새로운 학습 시작 (대상선택부터)
               resetState();
-              setCurrentPage('home'); // App.tsx에서 'home' = AudienceSelection 렌더링
+              setCurrentPage('home'); // AudienceSelection으로 이동
             }}
           >
             <CardHeader>
