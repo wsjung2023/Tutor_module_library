@@ -1,8 +1,11 @@
 import { useAppStore } from '@/store/useAppStore';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export default function NavigationHeader() {
   const { currentPage, setCurrentPage, resetState, audience, character } = useAppStore();
+  const { user } = useAuth();
 
   const handleLogoClick = () => {
     resetState();
@@ -24,14 +27,27 @@ export default function NavigationHeader() {
 
           <nav className="flex items-center space-x-4">
             <button 
+              onClick={() => setCurrentPage('user-home')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('user-home') 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="nav-user-home"
+            >
+              <i className="fas fa-home mr-1"></i> 홈
+            </button>
+            
+            <button 
               onClick={() => setCurrentPage('home')}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive('home') 
                   ? 'text-blue-600 bg-blue-50' 
                   : 'text-gray-600 hover:text-gray-900'
               }`}
+              data-testid="nav-audience"
             >
-              <i className="fas fa-home mr-1"></i> Home
+              <i className="fas fa-users mr-1"></i> 학습
             </button>
             
             <button 
@@ -42,8 +58,23 @@ export default function NavigationHeader() {
                   ? 'text-blue-600 bg-blue-50' 
                   : 'text-gray-600 hover:text-gray-900 disabled:text-gray-400 disabled:cursor-not-allowed'
               }`}
+              data-testid="nav-character"
             >
-              <i className="fas fa-user mr-1"></i> Character
+              <i className="fas fa-user mr-1"></i> 캐릭터
+            </button>
+
+            <button 
+              onClick={() => setCurrentPage('subscription')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                isActive('subscription') 
+                  ? 'text-blue-600 bg-blue-50' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="nav-subscription"
+            >
+              <i className="fas fa-crown mr-1"></i> 구독
+              {user?.subscriptionTier === 'premium' && <Badge className="bg-blue-500 text-xs">프리미엄</Badge>}
+              {user?.subscriptionTier === 'pro' && <Badge className="bg-purple-500 text-xs">프로</Badge>}
             </button>
 
             <Button 
@@ -51,8 +82,18 @@ export default function NavigationHeader() {
               disabled={!character.name}
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              data-testid="nav-start-learning"
             >
-              <i className="fas fa-play mr-1"></i> Start Learning
+              <i className="fas fa-play mr-1"></i> 학습 시작
+            </Button>
+
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.href = '/api/logout'}
+              data-testid="nav-logout"
+            >
+              로그아웃
             </Button>
           </nav>
         </div>
