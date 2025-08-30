@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "AI English Tutor",
+    "slug": "ai-english-tutor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aienglishtutor.app"
+    },
+    "android": {
+      "package": "com.aienglishtutor.app",
+      "permissions": ["RECORD_AUDIO", "INTERNET"]
+    },
+    "web": {
+      "bundler": "vite",
+      "output": "static"
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow AI English Tutor to access your microphone for voice practice."
+        }
+      ]
+    ],
+    "scheme": "ai-english-tutor"
+  }
+}
