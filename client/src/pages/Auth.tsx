@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
+import { useAppStore } from "@/store/useAppStore";
+import { ArrowLeft } from "lucide-react";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,6 +18,7 @@ export default function Auth() {
     lastName: ''
   });
   const { toast } = useToast();
+  const { setCurrentPage } = useAppStore();
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
@@ -81,6 +84,17 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => setCurrentPage('landing')}
+          className="mb-4 p-2"
+          data-testid="button-back-to-landing"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          뒤로가기
+        </Button>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
