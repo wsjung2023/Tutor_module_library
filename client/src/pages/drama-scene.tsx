@@ -498,19 +498,34 @@ Respond in JSON format:
   };
 
   const playAudioWithFallback = (text: string, audioUrl?: string) => {
-    // Try Supertone audio first
+    // Prioritize OpenAI TTS audio
     if (audioUrl && audioRef.current) {
-      console.log('Playing Supertone audio');
+      console.log('Playing OpenAI TTS audio');
       audioRef.current.src = audioUrl;
-      audioRef.current.play()
-        .then(() => console.log('Supertone audio played'))
-        .catch(error => {
-          console.error('Supertone audio failed, using browser TTS:', error);
-          speakWithBrowserTTS(text);
-        });
+      audioRef.current.oncanplaythrough = () => {
+        audioRef.current?.play()
+          .then(() => {
+            console.log('OpenAI TTS audio played successfully');
+            // Hide any previous fallback messages
+            toast({
+              title: "🎭 AI Voice Active",
+              description: "High-quality voice synthesis playing"
+            });
+          })
+          .catch(error => {
+            console.error('OpenAI TTS audio failed, using browser TTS:', error);
+            speakWithBrowserTTS(text);
+          });
+      };
+      audioRef.current.onerror = (error) => {
+        console.error('Audio loading error:', error);
+        speakWithBrowserTTS(text);
+      };
+      // Start loading the audio
+      audioRef.current.load();
     } else {
       // Fallback to browser TTS
-      console.log('Using browser TTS fallback');
+      console.log('No OpenAI audio URL provided, using browser TTS fallback');
       speakWithBrowserTTS(text);
     }
   };
@@ -599,8 +614,9 @@ Respond in JSON format:
       }, 100);
       
       toast({
-        title: "Using Browser Voice",
-        description: "External voice service unavailable, using system voice.",
+        title: "⚠️ Fallback Voice",
+        description: "Using system voice - OpenAI TTS unavailable",
+        variant: "destructive"
       });
     } else {
       console.error('Browser TTS not supported');
