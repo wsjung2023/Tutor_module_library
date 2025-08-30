@@ -17,8 +17,8 @@ export default function Subscription() {
   const [selectedProvider, setSelectedProvider] = useState<'portone' | 'toss' | 'paddle'>('portone');
 
   const subscribeMutation = useMutation({
-    mutationFn: async ({ plan, provider }: { plan: string; provider: string }) => {
-      const response = await apiRequest("POST", "/api/subscribe", { plan, provider });
+    mutationFn: async ({ tier, provider }: { tier: string; provider: string }) => {
+      const response = await apiRequest("POST", "/api/subscribe", { tier, provider });
       return response.json();
     },
     onSuccess: (data) => {
@@ -84,8 +84,8 @@ export default function Subscription() {
     },
   });
 
-  const handleSubscribe = (plan: string) => {
-    subscribeMutation.mutate({ plan, provider: selectedProvider });
+  const handleSubscribe = (tier: string) => {
+    subscribeMutation.mutate({ tier, provider: selectedProvider });
   };
 
   const handleCancel = () => {
@@ -310,13 +310,13 @@ export default function Subscription() {
                 <li>✅ 이미지 생성 60장</li>
                 <li>✅ HD 이미지 생성 무제한</li>
                 <li>✅ 실시간 음성 대화</li>
-                <li>✅ 개인 맞춤 학습 분석</li>
+                <li>✅ 24/7 우선 지원</li>
                 <li>✅ API 접근 권한</li>
                 <li>✅ 우선 고객지원</li>
               </ul>
               {((user as any)?.subscriptionTier || 'free') !== 'premium' && (
                 <Button 
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
                   onClick={() => handleSubscribe('premium')}
                   disabled={subscribeMutation.isPending}
                   data-testid="button-subscribe-premium"

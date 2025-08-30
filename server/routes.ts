@@ -154,8 +154,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.status(400).json({ message: "Payment failed", error: paymentData });
         }
       } else {
-        // For other providers (Toss, Paddle), implement similar logic
-        res.status(501).json({ message: "Payment provider not implemented yet" });
+        // For development: Mock payment success for other providers
+        const user = await storage.updateUserSubscription(userId, {
+          subscriptionTier: tier,
+          paymentProvider: provider,
+          subscriptionStatus: 'active',
+          customerId: `${provider}_${userId}`,
+          subscriptionId: `${provider}_sub_${Date.now()}`,
+          subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+        });
+        
+        res.json({ 
+          success: true, 
+          user, 
+          message: `${provider} 결제가 완료되었습니다 (개발 모드)` 
+        });
       }
       
     } catch (error) {
