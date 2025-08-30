@@ -1,80 +1,102 @@
-import { type User, type InsertUser, type Session, type InsertSession } from "@shared/schema";
-import { randomUUID } from "crypto";
+import {
+  users,
+  learningSessions,
+  type User,
+  type UpsertUser,
+  type InsertSession,
+  type LearningSession,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
-// modify the interface with any CRUD methods
-// you might need
-
+// Interface for storage operations
 export interface IStorage {
+  // User operations for Replit Auth
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
-  // Session methods
-  createSession(session: InsertSession): Promise<Session>;
-  getSession(id: string): Promise<Session | undefined>;
-  updateSession(id: string, updates: Partial<Session>): Promise<Session | undefined>;
-  getUserSessions(userId: string): Promise<Session[]>;
+  // Learning session methods
+  createSession(session: InsertSession): Promise<LearningSession>;
+  getSession(id: string): Promise<LearningSession | undefined>;
+  updateSession(id: string, updates: Partial<LearningSession>): Promise<LearningSession | undefined>;
+  getUserSessions(userId: string): Promise<LearningSession[]>;
+  
+  // Subscription methods
+  updateUserSubscription(userId: string, subscriptionData: {
+    subscriptionTier: string;
+    subscriptionStatus: string;
+    paymentProvider: string;
+    customerId: string;
+    subscriptionId: string;
+    subscriptionExpiresAt?: Date;
+  }): Promise<User | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private sessions: Map<string, Session>;
-
-  constructor() {
-    this.users = new Map();
-    this.sessions = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
+  // User operations for Replit Auth
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async createSession(insertSession: InsertSession): Promise<Session> {
-    const id = randomUUID();
-    const session: Session = {
-      ...insertSession,
-      id,
-      createdAt: new Date()
-    } as Session;
-    this.sessions.set(id, session);
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Learning session operations
+  async createSession(sessionData: InsertSession): Promise<LearningSession> {
+    const [session] = await db.insert(learningSessions).values(sessionData).returning();
     return session;
   }
 
-  async getSession(id: string): Promise<Session | undefined> {
-    return this.sessions.get(id);
+  async getSession(id: string): Promise<LearningSession | undefined> {
+    const [session] = await db.select().from(learningSessions).where(eq(learningSessions.id, id));
+    return session;
   }
 
-  async updateSession(id: string, updates: Partial<Session>): Promise<Session | undefined> {
-    const session = this.sessions.get(id);
-    if (!session) return undefined;
-    
-    const updatedSession = { ...session, ...updates };
-    this.sessions.set(id, updatedSession);
-    return updatedSession;
+  async updateSession(id: string, updates: Partial<LearningSession>): Promise<LearningSession | undefined> {
+    const [session] = await db
+      .update(learningSessions)
+      .set(updates)
+      .where(eq(learningSessions.id, id))
+      .returning();
+    return session;
   }
 
-  async getUserSessions(userId: string): Promise<Session[]> {
-    return Array.from(this.sessions.values()).filter(
-      session => session.userId === userId
-    );
+  async getUserSessions(userId: string): Promise<LearningSession[]> {
+    return db.select().from(learningSessions).where(eq(learningSessions.userId, userId));
+  }
+
+  // Subscription operations
+  async updateUserSubscription(userId: string, subscriptionData: {
+    subscriptionTier: string;
+    subscriptionStatus: string;
+    paymentProvider: string;
+    customerId: string;
+    subscriptionId: string;
+    subscriptionExpiresAt?: Date;
+  }): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...subscriptionData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

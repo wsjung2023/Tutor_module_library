@@ -1,7 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
+import { paymentService } from "./services/payment";
 import { 
+  insertSessionSchema,
   generateImageRequestSchema, 
   generateDialogueRequestSchema, 
   ttsRequestSchema,
@@ -14,6 +17,83 @@ import { generateTTS } from "./services/supertone";
 import { generateOpenAITTS, getOpenAIVoiceForCharacter } from "./services/openai-tts";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Subscription routes
+  app.post('/api/subscribe', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { plan, provider } = req.body;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const paymentProvider = paymentService.getProvider(provider) || 
+                              paymentService.getRecommendedProvider('KR');
+      
+      const result = await paymentProvider.createSubscription(user, plan);
+      
+      if (result.status === 'active') {
+        await storage.updateUserSubscription(userId, {
+          subscriptionTier: plan,
+          subscriptionStatus: 'active',
+          paymentProvider: paymentProvider.name,
+          customerId: result.customerId,
+          subscriptionId: result.subscriptionId,
+          subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30일
+        });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error("Subscription error:", error);
+      res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  app.post('/api/cancel-subscription', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.subscriptionId || !user.paymentProvider) {
+        return res.status(400).json({ message: "No active subscription found" });
+      }
+
+      const provider = paymentService.getProvider(user.paymentProvider);
+      if (provider) {
+        await provider.cancelSubscription(user.subscriptionId);
+        
+        await storage.updateUserSubscription(userId, {
+          subscriptionTier: 'free',
+          subscriptionStatus: 'canceled',
+          paymentProvider: user.paymentProvider,
+          customerId: user.customerId!,
+          subscriptionId: user.subscriptionId,
+        });
+      }
+
+      res.json({ message: "Subscription canceled successfully" });
+    } catch (error) {
+      console.error("Cancel subscription error:", error);
+      res.status(500).json({ message: "Failed to cancel subscription" });
+    }
+  });
   // Character Image Generation
   app.post("/api/generate-image", async (req, res) => {
     try {

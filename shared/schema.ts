@@ -23,8 +23,9 @@ export const users = pgTable("users", {
   // Subscription fields
   subscriptionTier: varchar("subscription_tier").default("free"), // free, premium, pro
   subscriptionStatus: varchar("subscription_status").default("active"), // active, canceled, expired
-  stripeCustomerId: varchar("stripe_customer_id"),
-  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  paymentProvider: varchar("payment_provider"), // portone, toss, paddle
+  customerId: varchar("customer_id"),
+  subscriptionId: varchar("subscription_id"),
   subscriptionExpiresAt: timestamp("subscription_expires_at"),
   // Usage tracking
   dailyUsageCount: varchar("daily_usage_count").default("0"),
