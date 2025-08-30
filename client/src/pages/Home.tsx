@@ -12,10 +12,12 @@ export default function Home() {
   const getSubscriptionBadge = () => {
     const tier = (user as any)?.subscriptionTier || 'free';
     switch (tier) {
-      case 'premium':
-        return <Badge variant="default" className="bg-blue-500">프리미엄</Badge>;
+      case 'starter':
+        return <Badge variant="default" className="bg-green-500">스타터</Badge>;
       case 'pro':
         return <Badge variant="default" className="bg-purple-500">프로</Badge>;
+      case 'premium':
+        return <Badge variant="default" className="bg-blue-500">프리미엄</Badge>;
       default:
         return <Badge variant="secondary">무료</Badge>;
     }
@@ -54,7 +56,9 @@ export default function Home() {
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer" 
             data-testid="card-quick-start"
-            onClick={() => setCurrentPage('home')}
+            onClick={() => {
+              setCurrentPage('character'); // 바로 캐릭터 선택으로 이동
+            }}
           >
             <CardHeader>
               <CardTitle className="text-lg">🚀 빠른 시작</CardTitle>
@@ -66,7 +70,13 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" data-testid="card-my-sessions">
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer" 
+            data-testid="card-my-sessions"
+            onClick={() => {
+              setCurrentPage('playground'); // 이전 세션 보기/학습 시작
+            }}
+          >
             <CardHeader>
               <CardTitle className="text-lg">📚 내 세션</CardTitle>
             </CardHeader>
@@ -77,7 +87,13 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" data-testid="card-progress">
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer" 
+            data-testid="card-progress"
+            onClick={() => {
+              setCurrentPage('playground'); // 학습 진도 확인
+            }}
+          >
             <CardHeader>
               <CardTitle className="text-lg">📊 학습 진도</CardTitle>
             </CardHeader>
