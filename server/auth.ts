@@ -1,5 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -62,6 +63,39 @@ export function setupAuth(app: Express) {
           } else {
             return done(null, user);
           }
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
+
+  // Google OAuth Strategy
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        callbackURL: "/api/google/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value;
+          if (!email) {
+            return done(new Error("No email found in Google profile"));
+          }
+
+          let user = await storage.getUserByEmail(email);
+          if (!user) {
+            // Create new user
+            user = await storage.createUser({
+              email,
+              firstName: profile.name?.givenName || "",
+              lastName: profile.name?.familyName || "",
+              profileImageUrl: profile.photos?.[0]?.value,
+            });
+          }
+          return done(null, user);
         } catch (error) {
           return done(error);
         }
@@ -144,15 +178,16 @@ export function setupAuth(app: Express) {
     res.json(req.user);
   });
 
-  // Google OAuth login (simplified - just redirect to Google)
-  app.get("/api/google", (req, res) => {
-    const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=${encodeURIComponent(req.protocol + '://' + req.get('host') + '/api/google/callback')}&scope=email%20profile&response_type=code`;
-    res.redirect(googleAuthUrl);
-  });
+  // Google OAuth routes
+  app.get("/api/google", 
+    passport.authenticate("google", { scope: ["profile", "email"] })
+  );
 
-  app.get("/api/google/callback", async (req, res) => {
-    // This would normally handle Google OAuth callback
-    // For now, just redirect to home
-    res.redirect("/");
-  });
+  app.get("/api/google/callback",
+    passport.authenticate("google", { failureRedirect: "/" }),
+    (req, res) => {
+      // Successful authentication, redirect home
+      res.redirect("/");
+    }
+  );
 }
