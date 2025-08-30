@@ -144,33 +144,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
 
-          // Create PortOne payment request
-          const portonePayment = await fetch('https://api.portone.io/payments', {
+          // Create PortOne payment request using correct V2 endpoint
+          const portonePayment = await fetch('https://api.portone.io/api/initiatepayment', {
             method: 'POST',
             headers: {
-              'Authorization': `PortOne ${process.env.PORTONE_ACCESS_TOKEN}`,
+              'Authorization': `Bearer ${process.env.PORTONE_ACCESS_TOKEN}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               paymentId: `subscription_${userId}_${Date.now()}`,
               orderName: `AI English Tutor ${tier} 플랜`,
-              totalAmount: paymentAmount,
-              currency: 'KRW',
-              channelKey: 'channel-key-123',
-              customerId: userId,
+              amount: {
+                total: paymentAmount,
+                currency: 'KRW'
+              },
               customer: {
-                fullName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim(),
+                id: userId,
+                name: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim(),
                 email: req.user.email
-              }
+              },
+              noticeUrls: [`${process.env.BASE_URL || 'http://localhost:5000'}/api/portone/webhook`]
             })
           });
           
-          // Check if response is JSON
+          // Check if response is JSON and log response
           const contentType = portonePayment.headers.get('content-type');
+          console.log('PortOne response status:', portonePayment.status);
+          console.log('PortOne response headers:', Object.fromEntries(portonePayment.headers.entries()));
+          
           if (contentType && contentType.includes('application/json')) {
             const paymentData = await portonePayment.json();
+            console.log('PortOne API response:', paymentData);
             
-            if (portonePayment.ok && paymentData.success) {
+            if (portonePayment.ok && (paymentData.success || paymentData.status === 'ready')) {
               const user = await storage.updateUserSubscription(userId, {
                 subscriptionTier: tier,
                 paymentProvider: provider,
@@ -273,6 +279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           const paddleData = await paddlePayment.json();
+          console.log('Paddle API response:', paddleData);
           
           if (paddlePayment.ok) {
             const user = await storage.updateUserSubscription(userId, {
