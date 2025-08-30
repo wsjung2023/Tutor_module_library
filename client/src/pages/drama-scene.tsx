@@ -523,41 +523,82 @@ Respond in JSON format:
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
-      utterance.pitch = character.gender === 'female' ? 1.2 : 0.9;
+      utterance.pitch = character.gender === 'female' ? 1.3 : 0.8;
       utterance.volume = 0.9;
       
-      // Select appropriate voice based on character gender
-      const voices = speechSynthesis.getVoices();
-      let selectedVoice;
+      // Wait for voices to load
+      const setVoice = () => {
+        const voices = speechSynthesis.getVoices();
+        console.log('Available voices:', voices.map(v => v.name));
+        console.log('Character gender:', character.gender);
+        
+        let selectedVoice;
+        
+        if (character.gender === 'female') {
+          // Try multiple female voice patterns
+          selectedVoice = voices.find(voice => {
+            const name = voice.name.toLowerCase();
+            return name.includes('female') || 
+                   name.includes('woman') ||
+                   name.includes('samantha') ||
+                   name.includes('karen') ||
+                   name.includes('zira') ||
+                   name.includes('susan') ||
+                   name.includes('anna') ||
+                   name.includes('helen') ||
+                   name.includes('catherine') ||
+                   (voice.gender && voice.gender === 'female');
+          });
+          
+          // Fallback: find voice with higher pitch or female-sounding characteristics
+          if (!selectedVoice) {
+            selectedVoice = voices.find(voice => {
+              const name = voice.name.toLowerCase();
+              return !name.includes('male') && 
+                     !name.includes('man') && 
+                     !name.includes('david') && 
+                     !name.includes('mark');
+            });
+          }
+        } else {
+          selectedVoice = voices.find(voice => {
+            const name = voice.name.toLowerCase();
+            return name.includes('male') || 
+                   name.includes('man') ||
+                   name.includes('david') ||
+                   name.includes('mark') ||
+                   name.includes('paul') ||
+                   name.includes('alex') ||
+                   (voice.gender && voice.gender === 'male');
+          });
+        }
+        
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+          console.log(`Selected voice: ${selectedVoice.name} for ${character.gender} character`);
+        } else {
+          console.log(`No specific ${character.gender} voice found, using default`);
+        }
+      };
       
-      if (character.gender === 'female') {
-        selectedVoice = voices.find(voice => 
-          voice.name.toLowerCase().includes('female') || 
-          voice.name.toLowerCase().includes('woman') ||
-          voice.name.toLowerCase().includes('samantha') ||
-          voice.name.toLowerCase().includes('karen') ||
-          voice.name.toLowerCase().includes('zira') ||
-          voice.name.toLowerCase().includes('susan')
-        );
+      // Set voice immediately if available, otherwise wait for voiceschanged event
+      if (speechSynthesis.getVoices().length > 0) {
+        setVoice();
       } else {
-        selectedVoice = voices.find(voice => 
-          voice.name.toLowerCase().includes('male') || 
-          voice.name.toLowerCase().includes('man') ||
-          voice.name.toLowerCase().includes('david') ||
-          voice.name.toLowerCase().includes('mark') ||
-          voice.name.toLowerCase().includes('paul')
-        );
+        speechSynthesis.onvoiceschanged = setVoice;
       }
       
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-      }
-      
-      utterance.onstart = () => console.log('Browser TTS started');
+      utterance.onstart = () => {
+        console.log('Browser TTS started');
+        console.log(`Using voice: ${utterance.voice?.name || 'default'} for ${character.gender} character`);
+      };
       utterance.onend = () => console.log('Browser TTS finished');
       utterance.onerror = (error) => console.error('Browser TTS error:', error);
       
-      speechSynthesis.speak(utterance);
+      // Small delay to ensure voice is set
+      setTimeout(() => {
+        speechSynthesis.speak(utterance);
+      }, 100);
       
       toast({
         title: "Using Browser Voice",
