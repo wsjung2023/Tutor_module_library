@@ -16,6 +16,9 @@ This is an AI English Tutor application that provides personalized, interactive 
 - ✅ **Landing Page Restored**: Original landing page with pricing plans and "무료로 시작하기" button
 - ✅ **Navigation Flow**: Landing → Auth → Home with proper back navigation
 - ✅ **Error Resolution**: Fixed all PWA, CSP, and MIME type browser errors (August 30, 2025)
+- ✅ **Authentication Fix**: Resolved 401 errors by adding /api/user endpoint and proper session handling
+- ✅ **PWA Implementation**: Added proper beforeinstallprompt event handling for app installation
+- ✅ **Pricing Strategy**: User analyzed cost structure with Free/Starter/Pro tiers based on AI API costs
 
 # User Preferences
 
