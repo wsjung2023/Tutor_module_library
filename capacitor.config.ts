@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.aienglishtutor.app',
   appName: 'AI English Tutor',
-  webDir: 'dist',
+  webDir: 'dist/public',
   server: {
     androidScheme: 'https'
   },
