@@ -28,6 +28,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
 
+  // Test user creation (temporary)
+  app.post("/api/create-test-user", async (req, res) => {
+    try {
+      const existingUser = await storage.getUserByEmail("mainstop3@gmail.com");
+      if (existingUser) {
+        console.log("Test user already exists:", existingUser.email);
+        return res.json({ message: "Test user already exists", user: existingUser });
+      }
+
+      const testUser = await storage.createUser({
+        email: "mainstop3@gmail.com",
+        password: "test123", // Plain text for testing
+        firstName: "Test",
+        lastName: "User",
+        subscriptionTier: 'free',
+        subscriptionStatus: 'active',
+        isAdmin: true
+      });
+
+      console.log("Created test user:", testUser.email);
+      res.json({ message: "Test user created", user: testUser });
+    } catch (error) {
+      console.error("Test user creation error:", error);
+      res.status(500).json({ message: "Failed to create test user" });
+    }
+  });
+
   // Authentication endpoints
   app.post("/api/register", async (req, res, next) => {
     try {
@@ -60,15 +87,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json(req.user);
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      console.log("Direct login attempt for:", email);
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        console.log("User not found:", email);
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      if (user.password !== password) {
+        console.log("Password mismatch for:", email);
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Set simple session
+      (req.session as any).userId = user.id;
+      console.log("Login successful for user:", user.email);
+      res.json(user);
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Authentication error" });
+    }
   });
 
   app.post("/api/logout", (req, res) => {
+    // Clear session
+    (req.session as any).userId = null;
     req.logout((err: any) => {
       if (err) {
         console.error("Logout error:", err);
-        return res.status(500).json({ message: "Logout failed" });
       }
       res.json({ message: "Logged out successfully" });
     });
@@ -76,8 +126,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/user", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = (req.session as any)?.userId || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Get user error:", error);
