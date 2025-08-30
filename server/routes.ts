@@ -152,15 +152,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+              channelKey: process.env.PORTONE_CHANNEL_KEY || 'channel-key-default',
               paymentId: `subscription_${userId}_${Date.now()}`,
               orderName: `AI English Tutor ${tier} 플랜`,
               amount: {
-                total: paymentAmount,
-                currency: 'KRW'
+                total: paymentAmount
               },
+              currency: 'KRW',
               customer: {
-                id: userId,
-                name: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim(),
+                name: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email,
                 email: req.user.email
               },
               noticeUrls: [`${process.env.BASE_URL || 'http://localhost:5000'}/api/portone/webhook`]
