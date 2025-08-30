@@ -369,10 +369,12 @@ export default function DramaScene() {
           const base64Audio = (reader.result as string).split(',')[1];
           
           // Speech recognition
-          const speechResponse: any = await apiRequest('POST', '/api/speech-recognition', {
+          const speechResponseRaw = await apiRequest('POST', '/api/speech-recognition', {
             audioBlob: base64Audio,
             language: 'en'
           });
+          
+          const speechResponse = await speechResponseRaw.json();
           
           const userText = speechResponse.text?.trim() || '';
           
@@ -638,103 +640,84 @@ Respond in JSON format:
       {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       
-      <div className="relative z-10 container mx-auto px-4 py-4 h-screen flex flex-col">
-        {/* Scene Header */}
-        <div className="flex items-center justify-between mb-4 bg-black bg-opacity-50 rounded-lg p-4">
-          <div className="flex items-center gap-4">
+      <div className="relative z-10 px-4 py-2 h-screen flex flex-col max-w-md mx-auto">
+        {/* Mobile Scene Header */}
+        <div className="bg-black bg-opacity-60 rounded-lg p-3 mb-3">
+          <div className="flex items-center gap-3">
             {character.imageUrl && (
               <div className="relative">
                 <img 
                   src={character.imageUrl} 
                   alt={character.name}
-                  className="w-64 h-80 rounded-lg object-cover object-top border-4 border-white shadow-lg"
+                  className="w-16 h-20 rounded-lg object-cover object-top border-2 border-white shadow-lg"
                 />
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
               </div>
             )}
-            <div>
-              <h1 className="text-white text-xl font-bold">{character.name}</h1>
-              <p className="text-gray-300 text-sm">{currentScenario.characterRole}</p>
-              <Badge variant="secondary" className="mt-1">
-                {currentScenario.situation}
-              </Badge>
+            <div className="flex-1">
+              <h1 className="text-white text-lg font-bold">{character.name}</h1>
+              <p className="text-gray-300 text-xs">{currentScenario.characterRole}</p>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-gray-400 text-xs">{currentScenario.situation}</span>
+                <div className="text-right">
+                  <Progress value={sceneProgress} className="w-20 h-1 mb-1" />
+                  <p className="text-white text-xs">{sceneProgress}%</p>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="text-right">
-            <Progress value={sceneProgress} className="w-32 mb-2" />
-            <p className="text-white text-sm">Scene Progress: {sceneProgress}%</p>
-            <Button variant="ghost" size="sm" onClick={resetScene} className="text-white">
-              <RotateCcw className="w-4 h-4" />
-            </Button>
           </div>
         </div>
 
-        {/* Dialogue History */}
-        <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+        {/* Mobile Chat History */}
+        <div className="flex-1 overflow-y-auto mb-3 space-y-2">
           {dialogueHistory.map((turn, index) => (
             <div key={index}>
               {turn.speaker === 'system' && (
-                <Card className="bg-blue-900 bg-opacity-80 border-blue-500">
-                  <CardContent className="p-4">
-                    <pre className="text-white text-sm whitespace-pre-wrap">{turn.text}</pre>
-                  </CardContent>
-                </Card>
+                <div className="bg-blue-900 bg-opacity-70 rounded-lg p-2 mx-4">
+                  <pre className="text-white text-xs whitespace-pre-wrap text-center">{turn.text}</pre>
+                </div>
               )}
               
               {turn.speaker === 'character' && (
-                <div className="flex items-start gap-3">
-                  {character.imageUrl ? (
-                    <img 
-                      src={character.imageUrl} 
-                      alt={character.name}
-                      className="w-16 h-20 rounded-lg object-cover object-top border-2 border-purple-500 shadow-md"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">{character.name[0]}</span>
+                <div className="flex items-start gap-2">
+                  <img 
+                    src={character.imageUrl} 
+                    alt={character.name}
+                    className="w-8 h-10 rounded object-cover object-top border border-purple-300"
+                  />
+                  <div className="flex-1 max-w-xs">
+                    <div className="bg-white bg-opacity-95 rounded-lg p-3 shadow-sm">
+                      <p className="text-gray-800 text-sm">{turn.text}</p>
+                      {turn.audioUrl && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => playAudio(turn)}
+                          className="mt-1 p-1 h-6 text-purple-600"
+                        >
+                          <Play className="w-3 h-3 mr-1" />
+                          Replay
+                        </Button>
+                      )}
                     </div>
-                  )}
-                  <div className="flex-1">
-                    <Card className="bg-white bg-opacity-90">
-                      <CardContent className="p-4">
-                        <p className="text-gray-800">{turn.text}</p>
-                        {turn.audioUrl && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => playAudio(turn)}
-                            className="mt-2 text-purple-600 hover:text-purple-800"
-                          >
-                            <Play className="w-4 h-4 mr-1" />
-                            Replay
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
                   </div>
                 </div>
               )}
               
               {turn.speaker === 'user' && (
-                <div className="flex items-start gap-3 justify-end">
-                  <div className="flex-1 text-right">
-                    <Card className="bg-blue-500 bg-opacity-90 inline-block">
-                      <CardContent className="p-4">
-                        <p className="text-white">{turn.text}</p>
-                        {turn.feedback && (
-                          <div className="mt-2 text-xs text-blue-100">
-                            <p>Accuracy: {turn.feedback.accuracy}%</p>
-                            {turn.feedback.pronunciation && (
-                              <p>Pronunciation: {turn.feedback.pronunciation}</p>
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                <div className="flex items-start gap-2 justify-end">
+                  <div className="flex-1 max-w-xs">
+                    <div className="bg-blue-500 text-white rounded-lg p-3 ml-8">
+                      <p className="text-sm">{turn.text}</p>
+                      {turn.feedback && (
+                        <div className="mt-1 text-xs text-blue-100">
+                          Score: {turn.feedback.accuracy}%
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">You</span>
+                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">You</span>
                   </div>
                 </div>
               )}
@@ -742,61 +725,46 @@ Respond in JSON format:
           ))}
         </div>
 
-        {/* Voice Input */}
-        <div className="bg-black bg-opacity-50 rounded-lg p-4">
+        {/* Mobile Voice Input */}
+        <div className="bg-black bg-opacity-60 rounded-lg p-3">
           {isListening && (
-            <div className="mb-4 text-center">
-              <p className="text-white text-sm mb-2">🎤 Acting in progress... Speak your lines!</p>
-              <Progress value={audioLevel} className="w-64 mx-auto" />
+            <div className="mb-3 text-center">
+              <p className="text-white text-xs mb-2">🎤 Listening... Speak clearly!</p>
+              <Progress value={audioLevel} className="w-full h-2" />
             </div>
           )}
 
           {isProcessing && (
-            <div className="mb-4 text-center">
-              <p className="text-white text-sm">🎭 Analyzing your performance...</p>
+            <div className="mb-3 text-center">
+              <p className="text-white text-xs">🎭 Processing...</p>
             </div>
           )}
 
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-2">
             {!isListening && !isProcessing && (
               <>
                 <Button
-                  size="lg"
+                  size="sm"
                   onClick={startListening}
-                  className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8 py-4"
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-full px-4 py-2"
                 >
-                  <Mic className="w-5 h-5 mr-2" />
-                  🎬 ACTION!
+                  <Mic className="w-4 h-4 mr-1" />
+                  ACTION
                 </Button>
                 
                 <Button
-                  size="lg"
-                  onClick={() => {
-                    setAutoListenMode(!autoListenMode);
-                    if (!autoListenMode) {
-                      startContinuousListening();
-                    }
-                  }}
-                  variant={autoListenMode ? "destructive" : "outline"}
-                  className="rounded-full px-6 py-4"
-                >
-                  <Mic className="w-4 h-4 mr-2" />
-                  {autoListenMode ? "Stop Auto" : "Auto Listen"}
-                </Button>
-
-                <Button
-                  size="lg"
+                  size="sm"
                   onClick={() => {
                     const script = currentScenario?.expressions || [];
                     if (script.length > 0) {
                       toast({
-                        title: "📝 Model Script",
-                        description: script.join(" → "),
+                        title: "📝 Example Script",
+                        description: script.join(" • "),
                       });
                     }
                   }}
                   variant="secondary"
-                  className="rounded-full px-6 py-4"
+                  className="rounded-full px-3 py-2"
                 >
                   📝 Script
                 </Button>
@@ -805,29 +773,26 @@ Respond in JSON format:
 
             {isListening && (
               <Button
-                size="lg"
+                size="sm"
                 onClick={stopListening}
                 variant="destructive"
-                className="rounded-full px-8 py-4"
+                className="rounded-full px-4 py-2"
               >
-                <MicOff className="w-5 h-5 mr-2" />
+                <MicOff className="w-4 h-4 mr-1" />
                 Stop
               </Button>
             )}
 
             {isProcessing && (
-              <Button size="lg" disabled className="rounded-full px-8 py-4">
+              <Button size="sm" disabled className="rounded-full px-4 py-2">
                 Processing...
               </Button>
             )}
           </div>
 
-          <div className="text-center mt-4">
-            <p className="text-white text-sm">
-              🎭 You're the {currentScenario.userRole}. Respond naturally to {character.name}!
-            </p>
-            <p className="text-gray-300 text-xs mt-1">
-              Objective: {currentScenario.objective}
+          <div className="text-center mt-2">
+            <p className="text-white text-xs">
+              🎭 You: {currentScenario.userRole} | {character.name}: {currentScenario.characterRole}
             </p>
           </div>
         </div>
