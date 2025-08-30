@@ -20,6 +20,7 @@ This is an AI English Tutor application that provides personalized, interactive 
 - ✅ **PWA Implementation**: Added proper beforeinstallprompt event handling for app installation
 - ✅ **Pricing Strategy**: Finalized pricing structure - Starter ₩4,900, Pro ₩9,900, Premium ₩19,900 with 135%+ margins
 - ✅ **Cost Analysis**: Detailed API cost breakdown with realistic usage limits ensuring profitability
+- ✅ **Google OAuth Fix**: Configured proper redirect URIs in Google Cloud Console for Replit domains
 
 # User Preferences
 
