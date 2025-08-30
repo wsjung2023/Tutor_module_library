@@ -58,18 +58,23 @@ export async function generateCharacterImage(request: GenerateImageRequest): Pro
   const outfit = getOutfitForScenario(scenario || 'restaurant', style);
   const pose = getPoseForStyle(style);
   
-  const prompt = `Wide angle full body photograph of a real human ${gender} person standing ${pose}, wearing ${outfit}, at ${background}. CRITICAL: Show the COMPLETE person from head to feet - legs, ankles, shoes all visible. Wide framing to include entire body. Full-length standing portrait with the person's feet clearly visible at the bottom of the image. Camera positioned far enough back to capture whole body without any cropping of limbs. Complete figure visible from top of head down to floor/ground showing feet and footwear.
-Ultra photorealistic, unedited RAW look, natural skin texture and pores, realistic human proportions.
-Shot on DSLR with wide angle lens to capture full body, f/2.8, soft natural light, slight film grain, balanced colors.
-Vertical composition showing complete standing figure, adequate distance from subject to show full body, feet visible at bottom of frame, clean background.
-No illustration, no anime, no 3D render, no doll-like face, no over-smoothing, no plastic skin, no exaggerated eyes. NO HEAD-AND-SHOULDERS CROPPING, NO WAIST-UP SHOTS.`;
+  const prompt = `FULL LENGTH BODY SHOT: Professional photograph of a real human ${gender} person, ENTIRE BODY visible from head to feet, standing ${pose}, wearing ${outfit}, at ${background}. 
+
+MANDATORY FRAMING: Complete figure visible - head at top 20% of image, feet at bottom 10% of image, showing shoes/footwear. Person should occupy 60-70% of image height to ensure full body is captured without cropping any limbs.
+
+CAMERA SETUP: Positioned 8-10 feet back from subject, wide angle lens (24-35mm equivalent), vertical orientation, adequate space above head and below feet.
+
+Ultra photorealistic, natural skin texture, realistic human proportions, professional portrait lighting.
+High quality DSLR shot, f/2.8, soft natural light, balanced exposure.
+
+STRICTLY NO: head-and-shoulders only, waist-up shots, cropped legs, cropped feet, tight framing that cuts off any body parts.`;
 
   try {
     const response = await openai.images.generate({
       model: "dall-e-3",
       prompt,
       n: 1,
-      size: "1024x1792", // Taller for full body shots
+      size: "1024x1792", // Maximum vertical ratio for full body shots
       quality: "hd", // High quality for realistic images
     });
 
