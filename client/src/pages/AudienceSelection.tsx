@@ -36,9 +36,13 @@ export default function AudienceSelection() {
               { icon: "fas fa-presentation", text: "발표 연습" }
             ]}
             theme={{
+              name: "student",
               colors: {
-                background: "bg-gradient-to-br from-pink-100 to-purple-100"
-              }
+                primary: "text-student-primary",
+                background: "bg-gradient-to-br from-pink-100 to-purple-100",
+                card: "student-pink"
+              },
+              cefr: "A2-B2"
             }}
             onClick={() => handleAudienceSelect('student')}
           />
@@ -55,9 +59,13 @@ export default function AudienceSelection() {
               { icon: "fas fa-utensils", text: "레스토랑" }
             ]}
             theme={{
+              name: "general",
               colors: {
-                background: "bg-gradient-to-br from-green-100 to-blue-100"
-              }
+                primary: "text-general-primary",
+                background: "bg-gradient-to-br from-green-100 to-blue-100",
+                card: "general-beige"
+              },
+              cefr: "A1-B2"
             }}
             onClick={() => handleAudienceSelect('general')}
           />
@@ -74,9 +82,13 @@ export default function AudienceSelection() {
               { icon: "fas fa-envelope", text: "이메일" }
             ]}
             theme={{
+              name: "business",
               colors: {
-                background: "bg-gradient-to-br from-blue-600 to-purple-700"
-              }
+                primary: "text-business-primary",
+                background: "bg-gradient-to-br from-blue-600 to-purple-700",
+                card: "business-pale"
+              },
+              cefr: "B1-C1"
             }}
             onClick={() => handleAudienceSelect('business')}
           />

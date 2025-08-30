@@ -19,7 +19,7 @@ interface AudienceCardProps {
   onClick: () => void;
 }
 
-export default function AudienceCard({
+export function AudienceCard({
   audience,
   title,
   description,
