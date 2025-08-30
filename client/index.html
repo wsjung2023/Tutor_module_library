@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     
+    <!-- PWA 관련 메타태그 명시적 차단 -->
+    <meta name="mobile-web-app-capable" content="no" />
+    <meta name="apple-mobile-web-app-capable" content="no" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    
     <!-- Disable CSP for development -->
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; img-src 'self' data: blob: https:; connect-src 'self' https: wss: ws:;"> -->
     
@@ -32,32 +37,37 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx" onerror="console.log('모듈 로딩 실패'); location.reload();"></script>
     <script>
-      // 모든 에러 완전 차단
-      window.addEventListener('error', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }, true);
+      // 완전한 PWA 차단 시스템
       
-      window.addEventListener('unhandledrejection', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }, true);
+      // 1. 모든 에러 이벤트 차단
+      ['error', 'unhandledrejection'].forEach(function(event) {
+        window.addEventListener(event, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }, true);
+      });
       
-      // PWA 관련 이벤트 완전 차단
-      window.addEventListener('beforeinstallprompt', function(e) {
-        e.preventDefault();
-        return false;
-      }, true);
+      // 2. PWA 관련 이벤트들 차단
+      ['beforeinstallprompt', 'appinstalled', 'fetch'].forEach(function(event) {
+        window.addEventListener(event, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }, true);
+      });
       
-      // 모듈 로딩 실패 시 강제 새로고침
-      setTimeout(function() {
-        if (!window.React) {
-          console.log('React 로딩 실패, 새로고침');
-          location.reload();
-        }
-      }, 5000);
+      // 3. Service Worker 등록 차단
+      if ('serviceWorker' in navigator) {
+        Object.defineProperty(navigator, 'serviceWorker', {
+          value: undefined,
+          writable: false
+        });
+      }
+      
+      // 4. PWA 관련 객체들 비활성화
+      window.PWAInstallPrompt = undefined;
+      window.beforeinstallprompt = undefined;
     </script>
   </body>
 </html>
