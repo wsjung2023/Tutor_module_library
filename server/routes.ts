@@ -1,33 +1,25 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  setupAuth(app);
 
   // Payment routes for Korean providers
-  app.post('/api/subscribe', isAuthenticated, async (req: any, res) => {
+  app.post('/api/subscribe', (req: any, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
     try {
       const { tier, provider } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Mock subscription creation for now
       // In production, this would integrate with PortOne, Toss, or Paddle
-      const user = await storage.updateUserSubscription(userId, {
+      const user = storage.updateUserSubscription(userId, {
         subscriptionTier: tier,
         paymentProvider: provider,
         subscriptionStatus: 'active'
@@ -40,11 +32,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/cancel-subscription', isAuthenticated, async (req: any, res) => {
+  app.post('/api/cancel-subscription', (req: any, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
-      const user = await storage.updateUserSubscription(userId, {
+      const user = storage.updateUserSubscription(userId, {
         subscriptionTier: 'free',
         subscriptionStatus: 'cancelled'
       });
