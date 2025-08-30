@@ -104,12 +104,16 @@ export function setupAuth(app: Express) {
 
           let user = await storage.getUserByEmail(email);
           if (!user) {
-            // Create new user
+            // Create new user with admin rights for mainstop3@gmail.com
+            const isAdmin = email === "mainstop3@gmail.com";
             user = await storage.createUser({
               email,
               firstName: profile.name?.givenName || "",
               lastName: profile.name?.familyName || "",
               profileImageUrl: profile.photos?.[0]?.value,
+              subscriptionTier: 'free',
+              subscriptionStatus: 'active',
+              isAdmin: isAdmin
             });
           }
           return done(null, user);

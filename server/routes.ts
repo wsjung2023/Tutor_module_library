@@ -28,32 +28,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
 
-  // Test user creation (temporary)
-  app.post("/api/create-test-user", async (req, res) => {
-    try {
-      const existingUser = await storage.getUserByEmail("mainstop3@gmail.com");
-      if (existingUser) {
-        console.log("Test user already exists:", existingUser.email);
-        return res.json({ message: "Test user already exists", user: existingUser });
-      }
+  // Google OAuth routes
+  app.get("/api/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-      const testUser = await storage.createUser({
-        email: "mainstop3@gmail.com",
-        password: "test123", // Plain text for testing
-        firstName: "Test",
-        lastName: "User",
-        subscriptionTier: 'free',
-        subscriptionStatus: 'active',
-        isAdmin: true
-      });
-
-      console.log("Created test user:", testUser.email);
-      res.json({ message: "Test user created", user: testUser });
-    } catch (error) {
-      console.error("Test user creation error:", error);
-      res.status(500).json({ message: "Failed to create test user" });
+  app.get("/api/google/callback", 
+    passport.authenticate("google", { failureRedirect: "/auth" }),
+    (req, res) => {
+      res.redirect("/"); // Redirect to home after successful login
     }
-  });
+  );
 
   // Authentication endpoints
   app.post("/api/register", async (req, res, next) => {
