@@ -8,6 +8,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useAuth } from "@/hooks/useAuth";
 
 import { DebugPanel } from "@/components/debug-panel";
+import { ProductionDebugger } from "@/components/ProductionDebugger";
 
 import NavigationHeader from "@/components/navigation-header";
 import LoadingModal from "@/components/loading-modal";
@@ -86,6 +87,7 @@ function AppContent() {
       <ErrorModal />
       <Toaster />
       <DebugPanel />
+      <ProductionDebugger />
     </TooltipProvider>
   );
 }

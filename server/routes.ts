@@ -31,6 +31,38 @@ function getPaddlePriceId(tier: string): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Error logging endpoint for production debugging
+  app.post('/api/log-error', (req, res) => {
+    const { error, url, userAgent, timestamp, stack } = req.body;
+    console.error('Production Client Error:', {
+      error,
+      url,
+      userAgent,
+      timestamp,
+      stack,
+      sessionId: req.sessionID,
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false
+    });
+    res.status(200).json({ logged: true });
+  });
+
+  // Session debug endpoint
+  app.get('/api/debug/session', (req: any, res) => {
+    const sessionInfo = {
+      sessionID: req.sessionID,
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      sessionUserId: (req.session as any)?.userId,
+      passportUser: req.user?.id,
+      cookies: req.headers.cookie,
+      sessionExists: !!req.session,
+      environment: process.env.NODE_ENV,
+      userAgent: req.headers['user-agent']
+    };
+    
+    console.log('Session Debug Info:', sessionInfo);
+    res.json(sessionInfo);
+  });
+
   // Auth middleware
   setupAuth(app);
 
@@ -100,14 +132,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // More lenient user check for production deployment
       const userId = (req.session as any)?.userId || req.user?.id;
       
-      // Log session and user details for debugging
-      console.log("Session details:", {
+      // Enhanced session debugging for production
+      const sessionDebug = {
         sessionId: req.sessionID,
         sessionUserId: (req.session as any)?.userId,
         isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
         userFromPassport: req.user?.id,
-        sessionStore: !!req.session
-      });
+        sessionStore: !!req.session,
+        cookies: req.headers.cookie,
+        userAgent: req.headers['user-agent'],
+        environment: process.env.NODE_ENV,
+        requestUrl: req.url,
+        method: req.method
+      };
+      
+      console.log("GET /api/user - Session details:", sessionDebug);
       
       if (!userId && !req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });

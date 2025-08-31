@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "./utils/errorLogger"; // Production error logging
 
 // 에러 완전 차단
 const originalError = console.error;
