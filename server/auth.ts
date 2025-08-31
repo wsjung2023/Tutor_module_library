@@ -48,16 +48,20 @@ export function setupAuth(app: Express) {
     checkPeriod: 86400000, // prune expired entries every 24h
   });
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
+    name: 'fluentdrama.sid', // Custom session name
     cookie: {
-      secure: false, // set to true in production with HTTPS
+      secure: isProduction, // HTTPS only in production
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
-      sameSite: 'lax' // CORS와 SameSite 설정
+      sameSite: isProduction ? 'none' : 'lax', // Cross-site cookies for deployment
+      domain: isProduction ? '.replit.app' : undefined, // Allow subdomain cookies
     }
   };
 

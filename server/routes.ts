@@ -85,14 +85,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  app.get("/api/user", isAuthenticated, async (req: any, res) => {
+  app.get("/api/user", async (req: any, res) => {
     try {
+      // More lenient user check for production deployment
       const userId = (req.session as any)?.userId || req.user?.id;
-      if (!userId) {
+      
+      // Log session and user details for debugging
+      console.log("Session details:", {
+        sessionId: req.sessionID,
+        sessionUserId: (req.session as any)?.userId,
+        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+        userFromPassport: req.user?.id,
+        sessionStore: !!req.session
+      });
+      
+      if (!userId && !req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const user = await storage.getUser(userId);
+      // Try to get user ID from either session or passport
+      const finalUserId = userId || req.user?.id;
+      if (!finalUserId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+      
+      const user = await storage.getUser(finalUserId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
