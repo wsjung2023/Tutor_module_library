@@ -3,6 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { isAuthenticated, isAdmin, setupAuth, hashPassword } from "./auth";
 import passport from "passport";
+import OpenAI from "openai";
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // Pricing helper function
 function getTierPrice(tier: string): number {
@@ -682,7 +688,7 @@ Be authentic and contextual. Avoid generic greetings.`;
     } catch (error) {
       console.error('Opening generation error:', error);
       // Fallback to simple but still dynamic response
-      const fallbackOpening = `Hi there! I'm ${character.name}. ${character.style === 'cheerful' ? 'Great to meet you!' : character.style === 'calm' ? 'Nice to see you.' : 'Let\'s get started.'} How can I help you practice today?`;
+      const fallbackOpening = `Hi there! I'm ${req.body.character?.name || 'your tutor'}. ${req.body.character?.style === 'cheerful' ? 'Great to meet you!' : req.body.character?.style === 'calm' ? 'Nice to see you.' : 'Let\'s get started.'} How can I help you practice today?`;
       res.json({ openingLine: fallbackOpening });
     }
   });

@@ -35,39 +35,17 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx" onerror="console.log('모듈 로딩 실패'); location.reload();"></script>
+    <script type="module" src="/src/main.tsx"></script>
     <script>
-      // 완전한 PWA 차단 시스템
-      
-      // 1. 모든 에러 이벤트 차단
-      ['error', 'unhandledrejection'].forEach(function(event) {
-        window.addEventListener(event, function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }, true);
+      // 최소한의 에러 처리만 유지
+      window.addEventListener('error', function(e) {
+        console.warn('Non-critical error intercepted:', e.error);
       });
       
-      // 2. PWA 관련 이벤트들 차단
-      ['beforeinstallprompt', 'appinstalled', 'fetch'].forEach(function(event) {
-        window.addEventListener(event, function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }, true);
+      // PWA 설치 프롬프트만 차단
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
       });
-      
-      // 3. Service Worker 등록 차단
-      if ('serviceWorker' in navigator) {
-        Object.defineProperty(navigator, 'serviceWorker', {
-          value: undefined,
-          writable: false
-        });
-      }
-      
-      // 4. PWA 관련 객체들 비활성화
-      window.PWAInstallPrompt = undefined;
-      window.beforeinstallprompt = undefined;
     </script>
   </body>
 </html>
