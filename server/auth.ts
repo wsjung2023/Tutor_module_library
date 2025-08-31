@@ -43,47 +43,28 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  // Use different session storage for production vs development
-  let sessionStore;
-  if (isProduction) {
-    // For production, store sessions in cookies with encryption
-    sessionStore = undefined; // Use default cookie storage
-  } else {
-    // Development memory store
-    const Store = MemoryStore(session);
-    sessionStore = new Store({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    });
-  }
-  
+  // 모든 환경에서 메모리 스토어 사용 - 세션 문제 해결
+  console.log('Setting up session with memory store for all environments');
+  const Store = MemoryStore(session);
+  const sessionStore = new Store({
+    checkPeriod: 86400000, // 24 hours
+  });
+
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
-    saveUninitialized: true, // Changed to true for production compatibility
-    store: sessionStore, // Will be undefined for production (uses cookies)
-    name: 'connect.sid', // Use default session name
+    saveUninitialized: false, // 원래 설정으로 복원
+    store: sessionStore,
+    name: 'connect.sid',
     cookie: {
-      secure: isProduction, // HTTPS only in production
+      secure: false, // Replit에서는 프록시 때문에 false 필요
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      httpOnly: true, // Keep secure
-      sameSite: 'lax', // Use lax for better compatibility
+      httpOnly: true,
+      sameSite: 'lax',
     }
   };
 
   app.set("trust proxy", 1);
-  
-  // Additional CORS setup for production
-  if (isProduction) {
-    app.use((req, res, next) => {
-      res.header('Access-Control-Allow-Credentials', 'true');
-      res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      next();
-    });
-  }
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
