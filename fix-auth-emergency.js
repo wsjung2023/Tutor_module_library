@@ -1,4 +1,22 @@
-import passport from "passport";
+// 긴급 인증 문제 해결 스크립트
+const fs = require('fs');
+const path = require('path');
+
+console.log('🔧 긴급 인증 문제 해결 시작...');
+
+// 1. 현재 auth.ts 백업
+const authPath = path.join(__dirname, 'server', 'auth.ts');
+const backupPath = path.join(__dirname, 'server', 'auth.backup.ts');
+
+try {
+  fs.copyFileSync(authPath, backupPath);
+  console.log('✓ auth.ts 백업 완료');
+} catch (error) {
+  console.log('백업 생성 실패:', error.message);
+}
+
+// 2. 작동했던 auth.ts로 복원 (8/30 19:54 커밋 버전)
+const workingAuthContent = `import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Express } from "express";
@@ -20,7 +38,7 @@ const scryptAsync = promisify(scrypt);
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  return \`\${buf.toString("hex")}.\${salt}\`;
 }
 
 async function comparePasswords(supplied: string, stored: string) {
@@ -87,7 +105,7 @@ export function setupAuth(app: Express) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: `https://fluent-drama-mainstop3.replit.app/api/google/callback`,
+        callbackURL: \`https://fluent-drama-mainstop3.replit.app/api/google/callback\`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -193,4 +211,13 @@ export function isAdmin(req: any, res: any, next: any) {
     return next();
   }
   res.status(403).json({ message: "Admin access required" });
+}`;
+
+try {
+  fs.writeFileSync(authPath, workingAuthContent);
+  console.log('✓ auth.ts 작동 버전으로 복원 완료');
+} catch (error) {
+  console.log('복원 실패:', error.message);
 }
+
+console.log('🚀 긴급 인증 문제 해결 완료 - 이제 배포하세요');

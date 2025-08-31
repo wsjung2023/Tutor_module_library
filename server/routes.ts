@@ -56,11 +56,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cookies: req.headers.cookie,
       sessionExists: !!req.session,
       environment: process.env.NODE_ENV,
-      userAgent: req.headers['user-agent']
+      userAgent: req.headers['user-agent'],
+      sessionData: req.session
     };
     
     console.log('Session Debug Info:', sessionInfo);
     res.json(sessionInfo);
+  });
+
+  // Force create test user for debugging
+  app.post('/api/debug/create-test-user', async (req, res) => {
+    try {
+      const testUser = await storage.createUser({
+        email: 'mainstop3@gmail.com',
+        password: await hashPassword('test123'),
+        firstName: 'Test',
+        lastName: 'User',
+        subscriptionTier: 'free',
+        subscriptionStatus: 'active',
+        isAdmin: true
+      });
+      console.log('Test user created:', testUser);
+      res.json({ success: true, user: testUser });
+    } catch (error: any) {
+      console.error('Test user creation error:', error);
+      res.status(500).json({ error: error.message });
+    }
   });
 
   // Auth middleware
