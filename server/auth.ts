@@ -82,11 +82,10 @@ export function setupAuth(app: Express) {
     )
   );
 
-  // Replit 도메인 동적 감지
-  const currentDomain = process.env.REPLIT_DEV_DOMAIN || 'fluent-drama-mainstop3.replit.app';
-  const callbackURL = `https://${currentDomain}/api/google/callback`;
+  // 배포 환경에서는 고정 도메인 사용 (Google OAuth 정책 준수)
+  const callbackURL = `https://fluent-drama-mainstop3.replit.app/api/google/callback`;
   
-  console.log(`Google OAuth 콜백 URL 설정: ${callbackURL} (도메인: ${currentDomain})`);
+  console.log(`Google OAuth 콜백 URL 설정: ${callbackURL}`);
 
   passport.use(
     new GoogleStrategy(
