@@ -50,8 +50,9 @@ export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'dev-secret-key',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // 세션 생성을 위해 true로 변경
     store: sessionStore,
+    name: 'connect.sid',
     cookie: {
       httpOnly: true,
       secure: false,

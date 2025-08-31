@@ -84,8 +84,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Auth middleware
+  // Auth middleware - 세션 설정 먼저
   setupAuth(app);
+  
+  // 세션 강제 생성 테스트
+  app.use((req: any, res, next) => {
+    if (!req.sessionID) {
+      console.log('⚠️ 세션이 생성되지 않음 - 강제 생성 시도');
+      req.session.touch();
+    }
+    next();
+  });
 
   // Google OAuth routes
   app.get("/api/google", passport.authenticate("google", { scope: ["profile", "email"] }));
