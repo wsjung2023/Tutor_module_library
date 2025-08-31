@@ -71,7 +71,7 @@ export function setupAuth(app: Express) {
       async (email, password, done) => {
         try {
           const user = await storage.getUserByEmail(email);
-          if (!user || !(await comparePasswords(password, user.password))) {
+          if (!user || !user.password || !(await comparePasswords(password, user.password))) {
             return done(null, false);
           }
           return done(null, user);
@@ -82,12 +82,18 @@ export function setupAuth(app: Express) {
     )
   );
 
+  // Replit 도메인 동적 감지
+  const currentDomain = process.env.REPLIT_DEV_DOMAIN || 'fluent-drama-mainstop3.replit.app';
+  const callbackURL = `https://${currentDomain}/api/google/callback`;
+  
+  console.log(`Google OAuth 콜백 URL 설정: ${callbackURL} (도메인: ${currentDomain})`);
+
   passport.use(
     new GoogleStrategy(
       {
         clientID: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: `https://fluent-drama-mainstop3.replit.app/api/google/callback`,
+        callbackURL: callbackURL,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
