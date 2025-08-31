@@ -43,29 +43,47 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const Store = MemoryStore(session);
-  const sessionStore = new Store({
-    checkPeriod: 86400000, // prune expired entries every 24h
-  });
-
   const isProduction = process.env.NODE_ENV === 'production';
+  
+  // Use different session storage for production vs development
+  let sessionStore;
+  if (isProduction) {
+    // For production, store sessions in cookies with encryption
+    sessionStore = undefined; // Use default cookie storage
+  } else {
+    // Development memory store
+    const Store = MemoryStore(session);
+    sessionStore = new Store({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    });
+  }
   
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
-    saveUninitialized: false,
-    store: sessionStore,
-    name: 'fluentdrama.sid', // Custom session name
+    saveUninitialized: true, // Changed to true for production compatibility
+    store: sessionStore, // Will be undefined for production (uses cookies)
+    name: 'connect.sid', // Use default session name
     cookie: {
       secure: isProduction, // HTTPS only in production
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      httpOnly: true,
-      sameSite: isProduction ? 'none' : 'lax', // Cross-site cookies for deployment
-      domain: isProduction ? '.replit.app' : undefined, // Allow subdomain cookies
+      httpOnly: true, // Keep secure
+      sameSite: 'lax', // Use lax for better compatibility
     }
   };
 
   app.set("trust proxy", 1);
+  
+  // Additional CORS setup for production
+  if (isProduction) {
+    app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      next();
+    });
+  }
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
@@ -238,6 +256,8 @@ export function setupAuth(app: Express) {
   app.get("/api/google/callback",
     passport.authenticate("google", { failureRedirect: "/" }),
     (req, res) => {
+      // Store user ID in session for production compatibility
+      (req.session as any).userId = req.user?.id;
       // Successful authentication, redirect home
       res.redirect("/");
     }

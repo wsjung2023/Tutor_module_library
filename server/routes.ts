@@ -62,6 +62,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       req.login(user, (err: any) => {
         if (err) return next(err);
+        // Store user ID in session for production compatibility
+        (req.session as any).userId = user.id;
         res.status(201).json(user);
       });
     } catch (error) {
@@ -71,6 +73,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
+    // Store user ID in session for production compatibility
+    (req.session as any).userId = req.user?.id;
     res.status(200).json(req.user);
   });
 
